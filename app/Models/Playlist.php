@@ -15,6 +15,10 @@ class Playlist extends Model
 
     public function videos()
     {
-        return $this->hasMany(Video::class);
+        return $this->belongsToMany(Video::class,'video_playlist');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -15,10 +15,19 @@ class Video extends Model
         'path',
         'user_id',
         'category_id',
+        'duration',
+        'file_format',
+        'resolution',
+        'file_size',
+        'frame_rate',
+        'thumbnail_path',
     ];
 
     public function category(){
         return $this->belongsTo(Category::class);
     }
-
+    public function playlists()
+    {
+        return $this->belongsToMany(Playlist::class,'video_playlist');
+    }
 }

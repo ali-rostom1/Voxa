@@ -15,7 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string("title");
             $table->text("description")->nullable();
-            $table->string('path');
+            $table->string('duration');
+            $table->string('file_format');
+            $table->string('resolution');
+            $table->string('file_size');
+            $table->string('frame_rate');
+            $table->string('thumbnail_path');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->timestamps();

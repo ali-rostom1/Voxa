@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conversation_participants', function (Blueprint $table) {
-            $table->foreignId('conversation_id')->constrained('conversations');
-            $table->foreignId('user_id')->constrained('users');
-            $table->primary(['conversation_id','user_id']);
+        Schema::create('reactions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->morphs('reactable');
+            $table->tinyInteger('value');
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('conversation_participants');
+        Schema::dropIfExists('reactions');
     }
 };

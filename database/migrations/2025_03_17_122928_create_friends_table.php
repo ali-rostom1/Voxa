@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
+        Schema::create('friends', function (Blueprint $table) {
             $table->id();
-            $table->text('body');
-            $table->boolean('read')->default(0);
-            $table->foreignId('conversation_id')->constrained('conversations');
-            $table->foreignId('sender_id')->constrained('users');            
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('friend_id')->constrained('users')->onDelete('cascade');
+            $table->boolean('is_accepted')->default(0);
+            $table->unique(['user_id','friend_id']);
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('friends');
     }
 };

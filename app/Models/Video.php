@@ -23,11 +23,32 @@ class Video extends Model
         'thumbnail_path',
     ];
 
-    public function category(){
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function category()
+    {
         return $this->belongsTo(Category::class);
     }
     public function playlists()
     {
         return $this->belongsToMany(Playlist::class,'video_playlist');
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    public function reactions()
+    {
+        return $this->morphMany(Reaction::class,'reactable');
+    }
+    public function views()
+    {
+        return $this->hasMany(View::class);
+    }
+    public function savedByUsers()
+    {
+        return $this->hasMany(User::class,'saved_videos');
     }
 }

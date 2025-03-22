@@ -123,4 +123,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    
+    //CDN URL FOR ASSETS
+    'cdn_url' => env('CDN_URL',''),
+
+
 ];

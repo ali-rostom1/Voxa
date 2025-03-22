@@ -1,12 +1,17 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function(){
     Route::post('/register',[AuthController::class,'register']);
     Route::post('/login',[AuthController::class,'login']);
-    Route::post('/logout',[AuthController::class,'logout'])->middleware('auth:api');
-    Route::post('/refresh',[AuthController::class,'refresh'])->middleware('auth:api');
+    Route::middleware('auth:api')->group(function(){
+        Route::post('/logout',[AuthController::class,'logout']);
+        Route::post('/refresh',[AuthController::class,'refresh']);
+        Route::apiResource('/videos',VideoController::class);
+    });
 });
+
 

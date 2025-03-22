@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string("title");
             $table->text("description")->nullable();
+            $table->string('original_video_path');
+            $table->string('manifest_url');
             $table->string('duration');
             $table->string('file_format');
             $table->string('resolution');

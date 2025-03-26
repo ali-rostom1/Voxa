@@ -5,10 +5,6 @@ namespace App\Http\Controllers;
 use App\Events\VideoUploaded;
 use App\Http\Requests\VideoStoreRequest;
 use App\Models\Video;
-use FFMpeg\Coordinate\Dimension;
-use FFMpeg\FFMpeg;
-use FFMpeg\FFProbe;
-use FFMpeg\Format\Video\X264;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -47,7 +43,6 @@ class VideoController extends Controller
             $originalPath = $request->file('video_upload')->storeAs('uploads/videos',$sanitizedFilename,'s3');
 
             $videoId = uniqid();
-
             
             event(new VideoUploaded($originalPath,$videoId,Auth::user()->id,$request->category_id,$request->title,$request->description));
 
@@ -70,17 +65,22 @@ class VideoController extends Controller
     public function show(string $id)
     {
         try{
-            
-
-
+            $video = Video::with(['user','category'])->find($id);
+            if(!$video){
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Video Not Found',
+                ]);
+            }
             return response()->json([
                 'status' => 'success',
-                'message' => 'Video Upload is being processed',
+                'message' => 'Video Retrieved successfully',
+                'data' => $video
             ],201);
         }catch(\Throwable $e){
             return response()->json([
                 'status' => 'error',
-                'message' => 'An internal server error occurred while trying to upload video.'
+                'message' => 'An internal server error occurred while trying to find video.'
             ],500);
         }
     }

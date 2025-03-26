@@ -4,11 +4,8 @@ namespace App\Listeners;
 
 use App\Events\VideoUploaded;
 use App\Models\Video;
-use FFMpeg\Coordinate\Dimension;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
-use FFMpeg\Format\Video\X264;
-use Illuminate\Console\Concerns\InteractsWithIO;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -123,9 +120,12 @@ class ProcessUploadedVideo implements ShouldQueue
             if ($dimensions['width'] > $originalWidth || $dimensions['height'] > $originalHeight) {
                 continue; // Skip resolutions higher than the original
             }
-
+             /** @var  FFMpeg\Media\Video $video**/
             $video = $ffmpeg->open($tempFile);
-            $video->filters()->resize(new \FFMpeg\Coordinate\Dimension($dimensions['width'], $dimensions['height']))->synchronize();
+
+            /** @var  FFMpeg\Filters\Video\VideoFilters $filters **/
+            $filters = $video->filters();
+            $filters->resize(new \FFMpeg\Coordinate\Dimension($dimensions['width'], $dimensions['height']))->synchronize();
 
             $outputFile = tempnam(sys_get_temp_dir(), 'output_') . ".mp4";
             $format = new \FFMpeg\Format\Video\X264();

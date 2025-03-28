@@ -117,6 +117,24 @@ class VideoController extends Controller
      */
     public function destroy(string $id)
     {
-        
+        try{
+            $video = Video::where('user_id',Auth::id())->findOrFail($id);
+            $video->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Video deleted successfully',
+                'data' => $video,
+            ],200);
+        }catch(\Illuminate\Database\Eloquent\ModelNotFoundException $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Video not found or you do not have permission to delete it.'
+            ],404);
+        }catch(\Throwable $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred trying to delete the video.'
+            ],500);
+        }
     }
 }

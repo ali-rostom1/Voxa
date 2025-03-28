@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\VideoUploaded;
 use App\Http\Requests\VideoStoreRequest;
+use App\Http\Requests\VideoUpdateRequest;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -88,9 +89,27 @@ class VideoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(VideoUpdateRequest $request, string $id)
     {
-        //
+        try{
+            $video = Video::where('user_id',Auth::id())->findOrFail($id);
+            $video->update($request->validated());
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Video updated successfully',
+                'data' => $video,
+            ],200);
+        }catch(\Illuminate\Database\Eloquent\ModelNotFoundException $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Video not found or you do not have permission to update it.'
+            ],404);
+        }catch(\Throwable $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred trying to update the video.'
+            ],500);
+        }
     }
 
     /**
@@ -98,6 +117,6 @@ class VideoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        
     }
 }

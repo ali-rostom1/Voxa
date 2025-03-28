@@ -13,6 +13,34 @@ use Illuminate\Support\Facades\Storage;
 class ProcessUploadedVideo implements ShouldQueue
 {
     use InteractsWithQueue;
+
+    // Add resolution configurations at the class level
+    private array $hlsResolutions = [
+        [
+            'name' => '240p',
+            'width' => 426,
+            'height' => 240,
+            'bitrate' => 800,
+            'audio_bitrate' => '96k'
+        ],
+        [
+            'name' => '360p',
+            'width' => 640,
+            'height' => 360,
+            'bitrate' => 1200,
+            'audio_bitrate' => '128k'
+        ],
+        [
+            'name' => '720p',
+            'width' => 1280,
+            'height' => 720,
+            'bitrate' => 3000,
+            'audio_bitrate' => '128k'
+        ]
+    ];
+
+
+
     /**
      * Create the event listener.
      */
@@ -46,7 +74,7 @@ class ProcessUploadedVideo implements ShouldQueue
             $originalWidth = $originalDimensions->getWidth();
             $originalHeight = $originalDimensions->getHeight();
 
-            // Encode video into multiple resolutions
+            // Encode video into multiple resolutions and generate variants and master playlists
             $this->encodeVideoResolutions($tempFile, $outputDir, $originalWidth, $originalHeight);
 
             // Generate and upload thumbnail
@@ -54,8 +82,6 @@ class ProcessUploadedVideo implements ShouldQueue
             Storage::disk('s3')->put("{$outputDir}/thumbnail.jpg", file_get_contents($thumbnailPath));
             unlink($thumbnailPath);
 
-            // Generate HLS manifest and upload to S3
-            $this->generateAndUploadHlsManifest($tempFile, $outputDir, $originalWidth, $originalHeight);
 
             // Save video metadata to the database
             $this->saveVideoMetadata(
@@ -108,33 +134,109 @@ class ProcessUploadedVideo implements ShouldQueue
      */
     private function encodeVideoResolutions(string $tempFile, string $outputDir, int $originalWidth, int $originalHeight): void
     {
-        $resolutions = [
-            '144p' => ['width' => 256, 'height' => 144],
-            '360p' => ['width' => 640, 'height' => 360],
-            '720p' => ['width' => 1280, 'height' => 720],
-            '1080p' => ['width' => 1920, 'height' => 1080],
-        ];
+        $manifestPaths = [];
+        $maxBitrate = 0;
 
-        $ffmpeg = FFMpeg::create();
-        foreach ($resolutions as $quality => $dimensions) {
-            if ($dimensions['width'] > $originalWidth || $dimensions['height'] > $originalHeight) {
-                continue; // Skip resolutions higher than the original
+        foreach ($this->hlsResolutions as $resolution) {
+            if ($resolution['width'] > $originalWidth || $resolution['height'] > $originalHeight) {
+                continue;
             }
-             /** @var  FFMpeg\Media\Video $video**/
-            $video = $ffmpeg->open($tempFile);
 
-            /** @var  FFMpeg\Filters\Video\VideoFilters $filters **/
-            $filters = $video->filters();
-            $filters->resize(new \FFMpeg\Coordinate\Dimension($dimensions['width'], $dimensions['height']))->synchronize();
+            $quality = $resolution['name'];
+            $manifestPath = $this->generateHlsVariant(
+                $tempFile,
+                $outputDir,
+                $resolution['width'],
+                $resolution['height'],
+                $resolution['bitrate'],
+                $resolution['audio_bitrate'],
+                $quality
+            );
 
-            $outputFile = tempnam(sys_get_temp_dir(), 'output_') . ".mp4";
-            $format = new \FFMpeg\Format\Video\X264();
-            $video->save($format, $outputFile);
+            $manifestPaths[] = [
+                'path' => $manifestPath,
+                'bandwidth' => $resolution['bitrate'] * 1000,
+                'resolution' => "{$resolution['width']}x{$resolution['height']}"
+            ];
 
-            // Upload encoded video to S3
-            Storage::disk('s3')->put("{$outputDir}/output_{$quality}.mp4", file_get_contents($outputFile));
-            unlink($outputFile); // Cleanup temp file
+            if ($resolution['bitrate'] > $maxBitrate) {
+                $maxBitrate = $resolution['bitrate'];
+            }
         }
+
+        // Generate master playlist after all variants
+        $this->generateMasterPlaylist($outputDir, $manifestPaths, $maxBitrate);
+    }
+
+    /**
+     * Generate HLS variant for a specific resolution
+     */
+    private function generateHlsVariant(
+        string $tempFile,
+        string $outputDir,
+        int $width,
+        int $height,
+        int $bitrate,
+        string $audioBitrate,
+        string $quality
+    ): string {
+        $variantDir = "{$outputDir}/{$quality}";
+        $localVariantDir = storage_path("app/{$variantDir}");
+        
+        if (!file_exists($localVariantDir)) {
+            mkdir($localVariantDir, 0777, true);
+        }
+
+        $manifestPath = "{$localVariantDir}/playlist.m3u8";
+        $segmentPattern = "{$localVariantDir}/segment_%03d.ts";
+
+        $command = sprintf(
+            'ffmpeg -threads 2 -i %s -vf scale=%d:%d -c:v libx264 -b:v %dk -maxrate %dk -bufsize %dk -c:a aac -b:a %s ' .
+            '-hls_time 6 -hls_playlist_type vod -hls_segment_filename %s %s',
+            escapeshellarg($tempFile),
+            $width,
+            $height,
+            $bitrate,
+            $bitrate * 1.2,  // maxrate = bitrate * 1.2
+            $bitrate * 2,     // bufsize = bitrate * 2
+            $audioBitrate,
+            $segmentPattern,
+            escapeshellarg($manifestPath)
+        );
+
+        exec($command);
+
+        // Upload entire variant directory to S3
+        foreach (glob("{$localVariantDir}/*") as $file) {
+            $relativePath = str_replace(storage_path('app/'), '', $file);
+            Storage::disk('s3')->put($relativePath, file_get_contents($file));
+            unlink($file);
+        }
+
+        return "{$variantDir}/playlist.m3u8";
+    }
+
+    /**
+     * Generate master HLS playlist
+     */
+    private function generateMasterPlaylist(string $outputDir, array $variants, int $maxBitrate): void
+    {
+        $masterContent = "#EXTM3U\n";
+        $masterContent .= "#EXT-X-VERSION:3\n";
+        
+        $cdnUrl = config('app.cdn_url');
+
+        foreach ($variants as $variant) {
+            $masterContent .= sprintf(
+                "#EXT-X-STREAM-INF:BANDWIDTH=%d,RESOLUTION=%s\n%s\n",
+                $variant['bandwidth'],
+                $variant['resolution'],
+                "{$cdnUrl}/{$variant['path']}"
+            );
+        }
+
+        $masterPath = "{$outputDir}/master.m3u8";
+        Storage::disk('s3')->put($masterPath, $masterContent);
     }
 
     /**
@@ -152,37 +254,6 @@ class ProcessUploadedVideo implements ShouldQueue
         return $thumbnailPath;
     }
 
-    /**
-     * Generate HLS manifest and upload to S3.
-     */
-    private function generateAndUploadHlsManifest(string $tempFile, string $outputDir, int $originalWidth, int $originalHeight): void
-    {
-        // Ensure the output directory exists
-        if (!file_exists(storage_path("app/{$outputDir}"))) {
-            mkdir(storage_path("app/{$outputDir}"), 0777, true);
-        }
-
-        $manifestPath = storage_path("app/{$outputDir}/output.m3u8");
-        $segmentPattern = storage_path("app/{$outputDir}/segment_%03d.ts");
-
-        $command = sprintf(
-            'ffmpeg -i %s -vf scale=%d:%d -c:v libx264 -b:v 800k -c:a aac -b:a 128k -hls_time 10 -hls_playlist_type vod -hls_segment_type mpegts -hls_segment_filename %s %s',
-            escapeshellarg($tempFile),
-            $originalWidth,
-            $originalHeight,
-            $segmentPattern,
-            escapeshellarg($manifestPath)
-        );
-        exec($command);
-
-        // Upload manifest and segments to S3
-        Storage::disk('s3')->put("{$outputDir}/output.m3u8", file_get_contents($manifestPath));
-        foreach (glob(storage_path("app/{$outputDir}/segment_*.ts")) as $segment) {
-            Storage::disk('s3')->put("{$outputDir}/" . basename($segment), file_get_contents($segment));
-            unlink($segment); // Cleanup segment file
-        }
-        unlink($manifestPath); // Cleanup manifest file
-    }
 
     /**
      * Save video metadata to the database.
@@ -209,7 +280,7 @@ class ProcessUploadedVideo implements ShouldQueue
             'duration' => $format->get('duration'),
             'file_format' => $format->get('format_name'),
             'resolution' => "{$videoStream->getDimensions()->getWidth()}x{$videoStream->getDimensions()->getHeight()}",
-            'manifest_url' => "{$cdnUrl}/{$outputDir}/output.m3u8",
+            'manifest_url' => "{$cdnUrl}/{$outputDir}/master.m3u8",
             'file_size' => Storage::disk('s3')->size($videoPath),
             'frame_rate' => $videoStream->get('avg_frame_rate'),
             'thumbnail_path' => "{$cdnUrl}/{$outputDir}/thumbnail.jpg",

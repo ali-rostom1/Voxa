@@ -17,6 +17,8 @@ class VideoController extends Controller
      */
     public function index()
     {
+        /** @var App\Models\User $user */
+        $user = Auth::user();
         try{
             $videos = Video::paginate(10);
             return response()->json([

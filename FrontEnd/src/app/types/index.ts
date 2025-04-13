@@ -38,3 +38,13 @@ export interface UserProfile {
     email: string;
     avatar?: string;
   }
+export interface VoxaHeaderProps {
+    className?: string;
+    logoUrl?: string;
+    onToggleSidebar?: () => void;
+    user?: UserProfile | null;
+    notifications?: number;
+    messages?: number;
+    onSearch?: (query: string) => void;
+  }
+  

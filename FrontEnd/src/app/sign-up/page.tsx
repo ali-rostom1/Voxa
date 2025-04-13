@@ -33,7 +33,6 @@ export default function Signup() {
 
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log(formData);
     setIsLoading(true);
     setError('');
     if(formData.password != formData.password_confirmation){

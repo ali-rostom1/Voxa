@@ -6,7 +6,7 @@ import Head from 'next/head';
 import apiClient from '../lib/apiClient';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import { VideoIcon, ChatIcon, PlaylistIcon, LikeIcon, FacebookIcon, GoogleIcon, LinkedInIcon } from '@/components/Icons';
+import { VideoIcon, ChatIcon, PlaylistIcon, LikeIcon, FacebookIcon, GoogleIcon, LinkedInIcon } from '@/components/ui/Icons';
 
 export default function Login() {
   const [formData, setFormData] = useState({

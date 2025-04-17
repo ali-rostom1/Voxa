@@ -20,7 +20,7 @@ class VideoController extends Controller
         /** @var App\Models\User $user */
         $user = Auth::user();
         try{
-            $videos = Video::paginate(10);
+            $videos = Video::with("views")->paginate(10);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully retrieved videos',

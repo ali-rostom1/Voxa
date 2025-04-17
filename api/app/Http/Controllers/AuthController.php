@@ -47,12 +47,19 @@ class AuthController extends Controller
                 ],401);
             }
             $user = Auth::user();
+            $refreshToken = JWTAuth::customClaims([
+                'exp' => now()->addDays(30)->timestamp,
+                'token_type' => 'refresh'
+            ])->fromUser($user);
+
+            $user = Auth::user();
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully authentificated user',
                 'user' => $user,
                 'authorisation' => [
-                    'token' => $token,
+                    'access_token' => $token,
+                    'refresh_token' => $refreshToken,
                     'type' => 'bearer',
                 ]
             ]);
@@ -92,6 +99,22 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An internal server error ocurred while trying to refresh your token',
+            ],500);
+        }
+    }
+    public function me()
+    {
+        try{
+            $user = Auth::user();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Successfully fetched user data',
+                'data' => $user,
+            ]);
+        }catch(\Throwable $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error ocurred while trying to fetch your data',
             ],500);
         }
     }

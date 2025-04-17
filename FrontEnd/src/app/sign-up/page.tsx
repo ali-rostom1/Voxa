@@ -4,10 +4,9 @@ import { useState } from "react"
 import Link from "next/link"
 import router from "next/navigation"
 import Head from "next/head"
-import { VideoIcon, ChatIcon, PlaylistIcon, LikeIcon, FacebookIcon, GoogleIcon, LinkedInIcon } from "@/components/ui/Icons"
+import { VideoIcon, ChatIcon, PlaylistIcon, LikeIcon, FacebookIcon, GoogleIcon, LinkedInIcon } from "@/app/components/ui/Icons"
 import { useRouter } from "next/navigation"
-import apiClient from "../lib/apiClient"
-import Cookies from "js-cookie"
+import apiClient from "../../lib/apiClient"
 
 export default function Signup() {
 

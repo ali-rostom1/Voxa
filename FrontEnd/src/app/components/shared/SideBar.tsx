@@ -4,8 +4,8 @@ import { useState, useEffect, FC, ReactElement } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/compat/router';
 import { NavItem } from '@/types';
-import { SidebarProps } from '@/types';
 import { SidebarItemProps } from '@/types';
+import { useSidebarStore } from '@/stores/SideBarState';
 import { 
   Home, 
   Compass, 
@@ -45,44 +45,15 @@ const SidebarItem : FC<SidebarItemProps> = ({
         );
         };
 
-const SideBar: FC<SidebarProps> = () => {
+export const SideBar = () => {
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
-        setCollapsed(true);
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
-      }
-    };
-
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const toggleSidebar = () => {
-    if (isMobile) {
-      setSidebarOpen(!sidebarOpen);
-      setCollapsed(false);
-    } else {
-      setCollapsed(!collapsed);
-    }
-    
-  };
-
-  const closeSidebar = () => {
-    if (isMobile) {
-      setSidebarOpen(false);
-    }
-  };
+  const { 
+    collapsed, 
+    isMobile, 
+    sidebarOpen, 
+    toggleSidebar, 
+    closeSidebar 
+  } = useSidebarStore();
 
   const navigationItems: NavItem[] = [
     { icon: Home, label: 'Home', href: '/' },
@@ -100,7 +71,7 @@ const SideBar: FC<SidebarProps> = () => {
 
   const sidebarClasses = `
     fixed top-0 left-0 h-full bg-gray-900 shadow-lg
-    transition-all duration-300 z-40
+    transition-all duration-300 z-101
     ${isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
     ${collapsed && !isMobile ? 'w-16' : 'w-64'}
   `;

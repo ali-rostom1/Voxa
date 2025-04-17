@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Head from 'next/head';
-import apiClient from '../lib/apiClient';
+import apiClient from '@/lib/apiClient';
+import { useAuth } from '@/context/AuthContext';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import { VideoIcon, ChatIcon, PlaylistIcon, LikeIcon, FacebookIcon, GoogleIcon, LinkedInIcon } from '@/components/ui/Icons';
+import { VideoIcon, ChatIcon, PlaylistIcon, LikeIcon, FacebookIcon, GoogleIcon, LinkedInIcon } from '@/app/components/ui/Icons';
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -17,7 +17,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
+  const {login} = useAuth();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -48,8 +48,8 @@ export default function Login() {
           sameSite: 'strict'
         });
       }
-
-      router.push('/home');
+      login(response.data.user);
+      router.push('/');
     } catch (err: any) {
       setError(
         err.response?.data?.message || 
@@ -62,14 +62,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full h-full">
-      <Head>
-        <title>Sign in | Voxa</title>
-        <meta name="description" content="Sign in to your Voxa account" />
-      </Head>
-      
+    <div className="min-h-screen bg-gray-50 w-full h-full"> 
       <div className="flex flex-col md:flex-row w-full">
-        {/* Left sidebar */}
         <div className="bg-gradient-to-b from-[#2c4258] to-[#1e2f3d] text-white w-full md:w-2/5 flex flex-col p-8 lg:p-12">
           <div className="max-w-md mx-auto md:my-36">
             <h1 className="text-4xl font-bold mb-4">Voxa</h1>
@@ -93,7 +87,7 @@ export default function Login() {
           </div>
         </div>
         
-        {/* Right form container */}
+        
         <div className="bg-white w-full md:w-3/5 p-8 lg:p-12 flex flex-col justify-center">
           <div className="max-w-md mx-auto w-full">
             <h2 className="text-3xl font-bold mb-2 text-gray-800">Welcome back</h2>

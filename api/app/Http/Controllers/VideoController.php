@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\VideoUploaded;
 use App\Http\Requests\VideoStoreRequest;
 use App\Http\Requests\VideoUpdateRequest;
+use App\Models\Playlist;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ class VideoController extends Controller
         /** @var App\Models\User $user */
         $user = Auth::user();
         try{
-            $videos = Video::withCount("views")->paginate(10);
+            $videos = Video::with(['user','category'])->paginate(10);
             $videos->loadCount('views');
             return response()->json([
                 'status' => 'success',
@@ -30,7 +31,8 @@ class VideoController extends Controller
         }catch(\Throwable $e){
             return response()->json([
                 'status' => 'error',
-                'message' => 'An internal server error occurred while trying to retrieve videos.'
+                'message' => 'An internal server error occurred while trying to retrieve videos.',
+                'error' => $e->getMessage()
             ],500);
         }
     }
@@ -140,4 +142,80 @@ class VideoController extends Controller
             ],500);
         }
     }
+    public function getVideoByCategory($categoryId)
+    {
+        try {
+            $videos = Video::where('category_id', $categoryId)->with(['user', 'category'])->paginate(10);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Videos retrieved successfully',
+                'data' => $videos,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve videos by category.',
+            ], 500);
+        }
+    }
+    public function getVideoByUser($userId)
+    {
+        try {
+            $videos = Video::where('user_id', $userId)->with(['user', 'category'])->paginate(10);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Videos retrieved successfully',
+                'data' => $videos,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve videos by user.',
+            ], 500);
+        }
+    }
+    public function getVideoBySearch(Request $request)
+    {
+        try {
+            $request->validate([
+                'search' => 'required|string|max:255',
+            ]);
+            $searchTerm = $request->input('search');
+            $videos = Video::where('title', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('description', 'LIKE', "%{$searchTerm}%")
+                ->with(['user', 'category'])
+                ->paginate(10);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Videos retrieved successfully',
+                'data' => $videos,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve videos by search.',
+            ], 500);
+        }
+    }
+    public function getVideoBySaved()
+    {
+        try {
+            $videos = Video::whereHas('savedByUsers', function ($query) {
+                $query->where('user_id', Auth::id());
+            })->with(['user', 'category'])->paginate(10);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Videos retrieved successfully',
+                'data' => $videos,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve saved videos.',
+            ], 500);
+        }
+    }
+
 }

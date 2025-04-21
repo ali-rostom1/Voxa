@@ -9,7 +9,8 @@ export interface VideoCardProps {
   duration: string
 }
 
-export interface CategoryCardProps {
+export interface Category {
+  id: number
   title: string
   count: string
   color: string
@@ -33,12 +34,21 @@ export interface UserProfile {
     id: string;
     name: string;
     email: string;
-    avatar?: string;
-  }
+    pfp_path?: string;
+}
 export interface VoxaHeaderProps {
   className?: string;
   notifications?: number;
   messages?: number;
   onSearch?: (query: string) => void;
-  }
-  
+}
+export interface Video {
+  id: string;
+  title: string;
+  user: string;
+  views: number;
+  uploadTime: string;
+  duration: string;
+  thumbnail: string;
+  channelAvatar?: string;
+}

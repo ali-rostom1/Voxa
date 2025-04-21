@@ -21,7 +21,7 @@ class VideoController extends Controller
         /** @var App\Models\User $user */
         $user = Auth::user();
         try{
-            $videos = Video::with(['user','category'])->paginate(10);
+            $videos = Video::with(['user','category'])->inRandomOrder()->paginate(10);
             $videos->loadCount('views');
             return response()->json([
                 'status' => 'success',
@@ -218,4 +218,46 @@ class VideoController extends Controller
         }
     }
 
+    public function trendingVideos(string $perPage = '10')
+    {
+        try {
+            $videos = Video::with(['user', 'category'])
+                ->withCount('views')
+                ->orderBy('views_count', 'desc')
+                ->paginate($perPage);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Trending videos retrieved successfully',
+                'data' => $videos,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve trending videos.',
+            ], 500);
+        }
+    }
+
+    public function featuredVideos(string $perPage = '10')
+    {
+        try {
+            $videos = Video::with(['user', 'category'])->whereHas('reactions', function ($query) {
+                $query->where('value', 1);
+            })->withCount(['reactions','views'])
+            ->orderBy('reactions_count', 'desc')
+            ->paginate($perPage);
+        
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Featured videos retrieved successfully',
+                'data' => $videos,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve featured videos.',
+            ], 500);
+        }
+    }
 }

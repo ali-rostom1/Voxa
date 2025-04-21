@@ -1,8 +1,8 @@
 'use client';
 
-import { SidebarStateInitializer } from '@/app/components/SidebarStateInitializer';
-import { SideBar } from '@/app/components/shared/SideBar';
-import { VoxaHeader } from '@/app/components/shared/header';
+import { SidebarStateInitializer } from '@/components/SidebarStateInitializer';
+import { SideBar } from '@/components/shared/SideBar';
+import { VoxaHeader } from '@/components/shared/header';
 
 export const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
   return (

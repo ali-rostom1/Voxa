@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Video } from '@/types';
-import { VideoCard } from '@/app/components/ui/video-card';
-import { SectionHeader } from '@/app/components/sections/section-header';
+import { VideoCard } from '@/components/ui/video-card';
+import { SectionHeader } from '@/components/sections/section-header';
 
 interface TrendingVideosProps {
   videos: Video[];

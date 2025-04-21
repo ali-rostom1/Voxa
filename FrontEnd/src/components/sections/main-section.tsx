@@ -1,10 +1,10 @@
 import { useSidebarStore } from "@/stores/SideBarState";
 import { useRouter } from "next/navigation";
 import { FC, useEffect } from "react";
-import { HeroSection } from "./hero-section";
-import { FeaturedVideos } from "./featured-videos";
-import { CategoriesSection } from "./categories-section";
-import { TrendingVideos } from "./trending-videos";
+import { HeroSection } from "@/components/sections/hero-section";
+import { FeaturedVideos } from "@/components/sections/featured-videos";
+import { CategoriesSection } from "@/components/sections/categories-section";
+import { TrendingVideos } from "@/components/sections/trending-videos";
 import { Category, Video } from "@/types";
 import { useState } from "react";
 import apiClient from "@/lib/apiClient";

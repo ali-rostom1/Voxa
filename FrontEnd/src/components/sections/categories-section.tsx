@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Category } from '@/types';
-import { CategoryCard } from '@/app/components/ui/category-card';
-import { SectionHeader } from '@/app/components/sections/section-header';  
+import { CategoryCard } from '@/components/ui/category-card';
+import { SectionHeader } from '@/components/sections/section-header';  
 
 interface CategoriesSectionProps {
   categories: Category[];

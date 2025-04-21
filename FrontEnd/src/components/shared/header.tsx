@@ -1,10 +1,10 @@
 import React, { FC } from 'react';
 
 import { Search, Bell, Mail } from 'lucide-react';
-import { NotificationBadge } from '@/app/components/ui/NotificationBadge';
-import { SearchBar } from '@/app/components/ui/SearchBar';
-import { UploadButton } from '@/app/components/ui/UploadButton';
-import { UserMenu } from '@/app/components/ui/UserMenu';
+import { NotificationBadge } from '@/components/ui/NotificationBadge';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { UploadButton } from '@/components/ui/UploadButton';
+import { UserMenu } from '@/components/ui/UserMenu';
 import { VoxaHeaderProps } from '@/types';
 import { Menu } from 'lucide-react';
 import { useSidebarStore } from '@/stores/SideBarState';

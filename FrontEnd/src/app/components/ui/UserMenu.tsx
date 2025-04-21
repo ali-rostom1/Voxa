@@ -43,9 +43,9 @@ export const UserMenu: FC<{ user: UserProfile | null }> = ({ user }) => {
           className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-800"
         >
           <div className="w-8 h-8 relative rounded-full overflow-hidden bg-gray-700">
-            {user.avatar ? (
+            {user.pfp_path ? (
               <Image 
-                src={user.avatar} 
+                src={user.pfp_path} 
                 alt={user.name} 
                 fill 
                 className="object-cover" 

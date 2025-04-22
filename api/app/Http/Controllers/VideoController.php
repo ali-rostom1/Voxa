@@ -262,23 +262,16 @@ class VideoController extends Controller
     {
         try {
             $request->validate([
-                'search' => 'nullable|string|max:255',
-                'category_id' => 'nullable|integer|exists:categories,id',
-                'order_by' => 'nullable|string|in:date,likes,views',
+                'category_name' => 'nullable|string|exists:categories,name',
+                'order_by' => 'nullable|string|in:Recent,Likes,Views',
                 'per_page' => 'nullable|integer|min:1|max:100',
             ]);
 
             $query = Video::with(['user', 'category'])->withCount('views');
-
-            if ($request->has('category_id')) {
-                $query->where('category_id', $request->category_id);
-            }
-
-            if ($request->has('search')) {
-                $searchTerm = $request->input('search');
-                $query->where(function ($q) use ($searchTerm) {
-                    $q->where('title', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('description', 'LIKE', "%{$searchTerm}%");
+            if ($request->has('category_name')) {
+                $categoryName = $request->input('category_name');
+                $query->whereHas('category', function ($q) use ($categoryName) {
+                    $q->where('name', $categoryName);
                 });
             }
 
@@ -289,10 +282,10 @@ class VideoController extends Controller
                             $q->where('value', 1);
                         }])->orderBy('likes_count', 'desc');
                         break;
-                    case 'views':
+                    case 'Views':
                         $query->orderBy('views_count', 'desc');
                         break;
-                    case 'date':
+                    case 'Recent':
                     default:
                         $query->orderBy('created_at', 'desc');
                         break;

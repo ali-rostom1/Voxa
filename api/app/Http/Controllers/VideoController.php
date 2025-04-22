@@ -18,8 +18,6 @@ class VideoController extends Controller
      */
     public function index()
     {
-        /** @var App\Models\User $user */
-        $user = Auth::user();
         try{
             $videos = Video::with(['user','category'])->inRandomOrder()->paginate(10);
             $videos->loadCount('views');
@@ -257,6 +255,65 @@ class VideoController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An internal server error occurred while trying to retrieve featured videos.',
+            ], 500);
+        }
+    }
+    public function getVideosFiltered(Request $request)
+    {
+        try {
+            $request->validate([
+                'search' => 'nullable|string|max:255',
+                'category_id' => 'nullable|integer|exists:categories,id',
+                'order_by' => 'nullable|string|in:date,likes,views',
+                'per_page' => 'nullable|integer|min:1|max:100',
+            ]);
+
+            $query = Video::with(['user', 'category'])->withCount('views');
+
+            if ($request->has('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            if ($request->has('search')) {
+                $searchTerm = $request->input('search');
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('title', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('description', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            if ($request->has('order_by')) {
+                switch ($request->order_by) {
+                    case 'likes':
+                        $query->withCount(['reactions as likes_count' => function ($q) {
+                            $q->where('value', 1);
+                        }])->orderBy('likes_count', 'desc');
+                        break;
+                    case 'views':
+                        $query->orderBy('views_count', 'desc');
+                        break;
+                    case 'date':
+                    default:
+                        $query->orderBy('created_at', 'desc');
+                        break;
+                }
+            } else {
+                $query->orderBy('created_at', 'desc'); 
+            }
+
+            $perPage = $request->input('per_page', 10);
+            $videos = $query->paginate($perPage);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Videos retrieved successfully',
+                'data' => $videos,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve videos.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

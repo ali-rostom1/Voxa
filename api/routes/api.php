@@ -16,6 +16,7 @@ Route::prefix('v1')->group(function(){
     Route::apiResource('categories',CategoryController::class)->only(['index','show']);
     Route::get('videos/featured/{perPage}',[VideoController::class,'featuredVideos']);
     Route::get('videos/trending/{perPage}',[VideoController::class,'trendingVideos']);
+    Route::post('videos/filter',[VideoController::class,'getVideosFiltered']);
     
        
     Route::middleware('auth:api')->group(function(){

@@ -220,7 +220,9 @@ class VideoController extends Controller
     {
         try {
             $videos = Video::with(['user', 'category'])
-                ->withCount('views')
+                ->withCount(['views' => function ($query) {
+                    $query->where('created_at', '>=', now()->subDays(7));
+                }])
                 ->orderBy('views_count', 'desc')
                 ->paginate($perPage);
 
@@ -233,6 +235,7 @@ class VideoController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An internal server error occurred while trying to retrieve trending videos.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -255,6 +258,7 @@ class VideoController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An internal server error occurred while trying to retrieve featured videos.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

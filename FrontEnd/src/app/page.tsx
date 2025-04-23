@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { DefaultLayout } from "@/components/layouts/DefaultLayout"
 import apiClient from "@/lib/apiClient"
 import { Video } from "@/types";
-import { VideoCard } from "@/components/ui/video-card";
 import { MainSection } from "@/components/sections/main-section";
 export default function Home() {
 

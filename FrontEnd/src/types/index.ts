@@ -52,3 +52,32 @@ export interface Video {
   thumbnail: string;
   channelAvatar?: string;
 }
+
+export interface VideoUploadProps {
+  onFileSelect: (file: File) => void;
+  maxSizeMB?: number;
+  allowedTypes?: string[];
+  className?: string;
+}
+
+export interface UploadDropzoneProps {
+  isDragActive: boolean;
+  error: string | null;
+  onButtonClick: () => void;
+  onDragEvents: {
+    onDragEnter: (e: React.DragEvent) => void;
+    onDragOver: (e: React.DragEvent) => void;
+    onDragLeave: (e: React.DragEvent) => void;
+    onDrop: (e: React.DragEvent) => void;
+  };
+  allowedTypes: string[];
+  maxSizeMB: number;
+}
+export interface UploadPreviewProps {
+  file: File;
+  uploading: boolean;
+  onCancel: () => void;
+}
+export interface UploadStatusProps {
+  status: 'idle' | 'uploading' | 'success' | 'error';
+}

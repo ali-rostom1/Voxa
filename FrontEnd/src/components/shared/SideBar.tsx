@@ -1,8 +1,6 @@
-'use client';
-
 import { useState, useEffect, FC, ReactElement, use } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/compat/router';
+import { usePathname } from 'next/navigation';
 import { NavItem } from '@/types';
 import apiClient from '@/lib/apiClient';
 import { SidebarItemProps } from '@/types';
@@ -56,7 +54,7 @@ const LoadingSkeleton = () => (
 export const SideBar = () => {
   const { user, loading } = useAuth();
   const { logout } = useAuth();
-  const router = useRouter();
+  const pathname = usePathname();
   const { 
     collapsed, 
     isMobile, 
@@ -156,7 +154,7 @@ export const SideBar = () => {
                   icon={item.icon}
                   label={item.label}
                   href={item.href}
-                  active={router?.pathname === item.href}
+                  active={pathname === item.href}
                   collapsed={collapsed}
                 />
               ))}
@@ -174,7 +172,7 @@ export const SideBar = () => {
                     icon={item.icon}
                     label={item.label}
                     href={item.href}
-                    active={router?.pathname === item.href}
+                    active={pathname === item.href}
                     collapsed={collapsed}
                   />
                 ))

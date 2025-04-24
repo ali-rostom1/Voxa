@@ -24,7 +24,7 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
   const [formData, setFormData] = useState<VideoFormData>({
     title: '',
     description: '',
-    category_id: categories.length > 0 ? categories[0].id : null,
+    category_id: null,
     video_upload: null
   });
   
@@ -38,7 +38,8 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
   };
   
   const handleCategorySelect = (categoryId: number) => {
-    setFormData(prev => ({ ...prev, category: categoryId }));
+    setFormData(prev => ({ ...prev, category_id: categoryId }));
+    console.log(formData);
     setIsDropdownOpen(false);
   };
   
@@ -73,7 +74,23 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const repsonse = await apiClient.post('api/v1/videos',formData);
+    console.log(formData);
+    const repsonse = await apiClient.post('api/v1/videos',formData,{
+        headers:{
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    if (repsonse.status === 201) {
+      onClose();
+      setFormData({
+        title: '',
+        description: '',
+        category_id: categories.length > 0 ? categories[0].id : null,
+        video_upload: null
+      });
+    } else {
+      console.error('Error uploading video:', repsonse.data.message);
+    }
   };
   
   if (!isOpen) return null;

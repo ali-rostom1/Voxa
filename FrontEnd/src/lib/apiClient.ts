@@ -12,6 +12,9 @@ apiClient.interceptors.request.use((config) => {
     if(token){
         config.headers.Authorization = `Bearer ${token}`;
     }
+    if(config.data instanceof FormData){
+        config.headers["Content-Type"] = 'multipart/form-data';
+    }
     return config;
 })
 
@@ -25,12 +28,12 @@ apiClient.interceptors.response.use(
         
         try {
             const refreshToken = Cookies.get('refresh_token');
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/refresh`, {
-            refresh_token: refreshToken
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}api/v1/refresh`, {
+                refresh_token: refreshToken
             });
             
-            Cookies.set('access_token', response.data.authorisation.access_token);
-            Cookies.set('refresh_token', response.data.authorisation.refresh_token);
+            Cookies.set('access_token', response.data.access_token);
+            Cookies.set('refresh_token', response.data.refresh_token);
             
             originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
             return apiClient(originalRequest);

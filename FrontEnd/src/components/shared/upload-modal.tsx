@@ -1,0 +1,203 @@
+import { useState, useRef } from 'react';
+import { Category } from '@/types';
+import { CategorySelect } from '@/components/ui/category-select';
+import apiClient from '@/lib/apiClient';
+
+interface UploadVideoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  categories: Category[];
+}
+
+interface VideoFormData {
+  title: string;
+  description: string;
+  category_id: number | null;
+  video_upload: File | null;
+}
+
+export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
+  isOpen,
+  onClose,
+  categories
+}) => {
+  const [formData, setFormData] = useState<VideoFormData>({
+    title: '',
+    description: '',
+    category_id: categories.length > 0 ? categories[0].id : null,
+    video_upload: null
+  });
+  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleCategorySelect = (categoryId: number) => {
+    setFormData(prev => ({ ...prev, category: categoryId }));
+    setIsDropdownOpen(false);
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({ ...prev, video_upload: e.target.files![0] }));
+    }
+  };
+  
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFormData(prev => ({ ...prev, video_upload: e.dataTransfer.files[0] }));
+    }
+  };
+  
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const repsonse = await apiClient.post('api/v1/videos',formData);
+  };
+  
+  if (!isOpen) return null;
+  
+  const selectedCategory = categories.find(cat => cat.id === formData.category_id);
+  
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">Upload Video</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit}>
+          {/* Video Upload Area */}
+          <div 
+            className={`mb-4 p-4 border-2 border-dashed rounded-lg text-center cursor-pointer ${
+              isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'
+            } ${formData.video_upload ? 'bg-green-50 border-green-400' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={triggerFileInput}
+          >
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="video/*"
+              className="hidden"
+            />
+            
+            {formData.video_upload ? (
+              <div>
+                <svg className="w-8 h-8 mx-auto text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <p className="text-sm text-gray-600">{formData.video_upload.name}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {(formData.video_upload.size / (1024 * 1024)).toFixed(2)} MB
+                </p>
+              </div>
+            ) : (
+              <div>
+                <svg className="w-10 h-10 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p className="text-sm font-medium text-gray-700">Drag and drop your video or click to browse</p>
+                <p className="text-xs text-gray-500 mt-1">MP4, WebM, MOV up to 100MB</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Title Input */}
+          <div className="mb-4">
+            <label htmlFor="title" className="block mb-1 text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter video title"
+              required
+            />
+          </div>
+          
+          {/* Description Input */}
+          <div className="mb-4">
+            <label htmlFor="description" className="block mb-1 text-sm font-medium text-gray-700">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter video description"
+            />
+          </div>
+          
+          {/* Category Select */}
+          <div className="mb-5">
+            <CategorySelect
+              categories={categories}
+              selectedCategoryId={formData.category_id}
+              onCategorySelect={handleCategorySelect}
+            />
+          </div>
+          
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 mr-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                !formData.video_upload || !formData.title ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={!formData.video_upload || !formData.title}
+            >
+              Upload
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};

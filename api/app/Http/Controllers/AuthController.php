@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -89,16 +90,23 @@ class AuthController extends Controller
     public function refresh()
     {
         try{
-            $token = JWTAuth::refresh(JWTAuth::getToken());
+            $refreshToken = request()->input('refresh_token');
+            if (!JWTAuth::setToken($refreshToken)->check()) {
+                throw new Exception("invalid Refresh token");
+            }
+            $newAccessToken = Auth::refresh();
+            
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully refreshed token',
-                'token' => $token,
+                'access_token' => $newAccessToken,
+                'refresh_token' => Auth::refresh(),
             ]);
         }catch(\Throwable $e){
             return response()->json([
                 'status' => 'error',
                 'message' => 'An internal server error ocurred while trying to refresh your token',
+                'error' => $e->getMessage(),
             ],500);
         }
     }

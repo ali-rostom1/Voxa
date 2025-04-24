@@ -12,7 +12,7 @@ export const CategorySelect = ({
     onCategorySelect: (id: number) => void;
   }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+    const [selectedCategory,setSelectedCategory] = useState<Category|null>(null);
     
     return (
       <div className="mb-4">
@@ -50,6 +50,7 @@ export const CategorySelect = ({
                       selectedCategoryId === category.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
                     }`}
                     onClick={() => {
+                      setSelectedCategory(category);
                       onCategorySelect(category.id);
                       setIsOpen(false);
                     }}

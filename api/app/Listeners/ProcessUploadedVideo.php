@@ -31,12 +31,41 @@ class ProcessUploadedVideo implements ShouldQueue
             'audio_bitrate' => '128k'
         ],
         [
+            'name' => '480p',
+            'width' => 854,
+            'height' => 480,
+            'bitrate' => 1800,
+            'audio_bitrate' => '128k'
+        ],
+        [
             'name' => '720p',
             'width' => 1280,
             'height' => 720,
             'bitrate' => 3000,
             'audio_bitrate' => '128k'
+        ],
+        [
+            'name' => '1080p',
+            'width' => 1920,
+            'height' => 1080,
+            'bitrate' => 5000,
+            'audio_bitrate' => '192k'
+        ],
+        [
+            'name' => '1440p',
+            'width' => 2560,
+            'height' => 1440,
+            'bitrate' => 8000,
+            'audio_bitrate' => '256k'
+        ],
+        [
+            'name' => '2160p',
+            'width' => 3840,
+            'height' => 2160,
+            'bitrate' => 14000,
+            'audio_bitrate' => '320k'
         ]
+        
     ];
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Settings, PauseIcon, PlayIcon, Minimize } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Settings, PauseIcon, PlayIcon, Minimize,SlidersHorizontal  } from 'lucide-react';
 import Hls from "hls.js"
 
 
@@ -7,6 +7,13 @@ interface VideoPlayerProps {
   videoSrc: string;
   poster?: string;
   onEnded?: () => void;
+}
+interface QualityLevel {
+    height: number;
+    width: number;
+    bitrate: number;
+    name: string;
+    id: number;
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -22,6 +29,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const [progress,setProgress] = useState<number>(0);
     const [isFullScreen,setIsFullScreen] = useState<boolean>(false);
     const [isMuted,setIsMuted] = useState<boolean>(false);
+    const [showQualityMenu,setShowQualityMenu] = useState<boolean>(false);
+    const [qualityLevels,setQualityLevels] = useState<QualityLevel[]>([]);
+    const [currentQuality,setCurrentQuality] = useState<number>(-1);
 
 
     useEffect(()=>{
@@ -30,8 +40,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             hlsRef.current = hls;
             hls.loadSource(videoSrc);
             hls.attachMedia(videoPlayerRef.current);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            hls.on(Hls.Events.MANIFEST_PARSED, (event,data) => {
                 console.log('Manifest loaded');
+                const levels = data.levels.map((level: any, index: number) => ({
+                    height: level.height,
+                    width: level.width,
+                    bitrate: level.bitrate,
+                    name: level.name || `${level.height}p`,
+                    id: index
+                }));
+                setQualityLevels(levels);
             });
             hls.on(Hls.Events.ERROR, (event, data) => {
                 console.error('HLS error:', data);
@@ -104,19 +122,31 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             videoPlayerRef.current.currentTime = time;
         }
     }
+    const changeQuality = (id : number) => {
+        if(hlsRef.current){
+            hlsRef.current.currentLevel = id;
+            setCurrentQuality(id);
+            setShowQualityMenu(false);
+            console.log(hlsRef.current.currentLevel);
+        }
+    }  
+    const toggleQualityMenu = () => {
+        setShowQualityMenu(!showQualityMenu);
+    }
 
   return (
-    <div className=' lg:w-[70%] aspect-video rounded-lg'>
-        <div className="relative" ref={containerRef}>
+    <div className=' lg:w-[70%] aspect-video rounded-3xl'>
+        <div className="relative rounded-3xl" ref={containerRef}>
             <video
                 ref={videoPlayerRef}
                 onTimeUpdate={handleTimeUpdate}
+                onClick={togglePause}
                 src={videoSrc}
                 poster={poster}
 
-                className='w-full '
+                className='w-full rounded-xl'
             />
-            <div className=" absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+            <div className=" absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent py-4 px-6 rounded-xl">
                 <div className='flex justify-between'>
                     <div className='flex items-center gap-6 mb-2'>
                         <button className='text-blue-700' onClick={togglePause}>
@@ -150,7 +180,40 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                         
                         
                     </div>
-                    <div className='flex items-center gap-6 mb-2'>
+                    <div className='flex items-center gap-6 mb-2 relative'>
+                    {qualityLevels.length > 0 && (
+                        <>
+                            <button 
+                                className='text-white' 
+                                onClick={toggleQualityMenu}
+                            >
+                                <SlidersHorizontal />
+                            </button>
+                            {showQualityMenu && (
+                                <div className="absolute bottom-10 right-10 bg-gray-800 rounded-md shadow-lg z-10 py-1 w-32">
+                                    <div className="text-white text-sm px-3 py-1">
+                                        Quality
+                                    </div>
+                                    <div className="border-t border-gray-700"></div>
+                                    <button
+                                        className={`w-full text-left px-3 py-1 text-sm ${currentQuality === -1 ? 'text-blue-500' : 'text-white'}`}
+                                        onClick={() => changeQuality(-1)}
+                                    >
+                                        Auto
+                                    </button>
+                                    {qualityLevels.map((level) => (
+                                        <button
+                                            key={level.id}
+                                            className={`w-full text-left px-3 py-1 text-sm ${currentQuality === level.id ? 'text-blue-500' : 'text-white'}`}
+                                            onClick={() => changeQuality(level.id)}
+                                        >
+                                            {level.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
                         <button className='text-white' onClick={ToggleFullscreen}>
                             {isFullScreen ? (
                                 <Minimize/>
@@ -165,10 +228,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 <input
                     type="range"
                     min="0"
+                    step='0.1'
                     max="100"
                     value={progress}
                     onChange={handleSeek}
-                    className="h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer w-[98%]"
+                    className="h-1 bg-gray-600 rounded-lg cursor-pointer w-[98%]"
                 />
             </div>
             

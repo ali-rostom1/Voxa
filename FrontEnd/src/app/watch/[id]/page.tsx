@@ -9,7 +9,7 @@ export default function Watch() {
     <DefaultLayout>
         <div className="mx-auto p-4">
             <VideoPlayer 
-                videoSrc="https://d30vieonhtu0fc.cloudfront.net/uploads/videos/video_680a18c412017/master.m3u8"
+                videoSrc="https://d30vieonhtu0fc.cloudfront.net/uploads/videos/video_680baba60f20c/master.m3u8"
                 poster=""
                 onEnded={() => console.log('Video playback ended')}
             />

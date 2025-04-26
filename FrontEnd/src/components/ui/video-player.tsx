@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, VolumeX, Maximize, Settings, PauseIcon, PlayIcon, Minimize,SlidersHorizontal  } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Settings, PauseIcon, PlayIcon, Minimize,SlidersHorizontal, Loader2  } from 'lucide-react';
 import Hls from "hls.js"
 
 
@@ -32,11 +32,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const [showQualityMenu,setShowQualityMenu] = useState<boolean>(false);
     const [qualityLevels,setQualityLevels] = useState<QualityLevel[]>([]);
     const [currentQuality,setCurrentQuality] = useState<number>(-1);
+    const [currentAutoQuality,setCurrentAutoQuality] = useState<number| null>(null);
+    const [isLoading,setIsLoading] = useState<boolean>(true);
+    const [wasPlayingBeforeChange,setWasPlayingBeforeChange] = useState<boolean>(false);
 
 
     useEffect(()=>{
         if(Hls.isSupported() && videoPlayerRef.current){
-            const hls = new Hls();
+            const hls = new Hls({
+                enableWorker: true,
+                autoStartLoad: true,
+                maxBufferLength: 30,
+                maxMaxBufferLength: 60,
+                maxBufferSize: 60 * 1000 * 1000,
+                maxBufferHole: 0.5,
+            });
             hlsRef.current = hls;
             hls.loadSource(videoSrc);
             hls.attachMedia(videoPlayerRef.current);
@@ -50,13 +60,40 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     id: index
                 }));
                 setQualityLevels(levels);
+                hls.currentLevel = -1;
+                setCurrentQuality(-1);
+            });
+            hls.on(Hls.Events.LEVEL_SWITCHED,(event,data)=>{
+                if(hls.currentLevel === -1){
+                    setCurrentAutoQuality(data.level);
+                }
+            })
+            hls.on(Hls.Events.FRAG_LOADING, () => {
+                setIsLoading(true);
+            });
+            hls.on(Hls.Events.FRAG_LOADED, () => { 
+                setIsLoading(false);
+                console.log(wasPlayingBeforeChange)
+                if(wasPlayingBeforeChange){
+                    videoPlayerRef.current?.play()
+                    setWasPlayingBeforeChange(false);
+                }
             });
             hls.on(Hls.Events.ERROR, (event, data) => {
                 console.error('HLS error:', data);
+                if(data.fatal){
+                    switch(data.type){
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            break;
+                    }
+                }
             });
-            return () => {
-                hls.destroy();
-            }
         }
         return () => {
             if (hlsRef.current) {
@@ -124,10 +161,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
     const changeQuality = (id : number) => {
         if(hlsRef.current){
+            setWasPlayingBeforeChange(isPlaying);
+            setIsLoading(true);
+            if(isPlaying) {
+                videoPlayerRef.current?.pause();
+            }
             hlsRef.current.currentLevel = id;
             setCurrentQuality(id);
             setShowQualityMenu(false);
-            console.log(hlsRef.current.currentLevel);
+            if(id === -1){
+                setCurrentAutoQuality(null);
+            }
         }
     }  
     const toggleQualityMenu = () => {
@@ -135,7 +179,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
 
   return (
-    <div className=' lg:w-[70%] aspect-video rounded-3xl'>
+    <div className=' lg:w-[70%] aspect-video rounded-3xl relative'>
+        {isLoading && (
+            <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20 rounded-xl">
+            <Loader2 className="animate-spin text-white w-12 h-12" />
+          </div>
+        )}
         <div className="relative rounded-3xl" ref={containerRef}>
             <video
                 ref={videoPlayerRef}
@@ -146,7 +195,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                 className='w-full rounded-xl'
             />
-            <div className=" absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent py-4 px-6 rounded-xl">
+            <div className=" absolute z-22 bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent py-4 px-6 rounded-xl">
                 <div className='flex justify-between'>
                     <div className='flex items-center gap-6 mb-2'>
                         <button className='text-blue-700' onClick={togglePause}>
@@ -190,26 +239,42 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 <SlidersHorizontal />
                             </button>
                             {showQualityMenu && (
-                                <div className="absolute bottom-10 right-10 bg-gray-800 rounded-md shadow-lg z-10 py-1 w-32">
-                                    <div className="text-white text-sm px-3 py-1">
+                                <div className="absolute bottom-12 right-6 bg-gray-900 bg-opacity-95 rounded-lg shadow-xl z-10 w-40 overflow-hidden border border-gray-700">
+                                    <div className="text-gray-300 text-xs font-medium uppercase tracking-wider px-4 py-2 border-b border-gray-700 flex items-center justify-between">
                                         Quality
+                                        <span className="text-blue-400 text-xs font-normal capitalize">
+                                            {currentQuality === -1 ? 'Auto' : qualityLevels.find(level => level.id === currentQuality)?.name || 'Custom'}
+                                        </span>
                                     </div>
-                                    <div className="border-t border-gray-700"></div>
-                                    <button
-                                        className={`w-full text-left px-3 py-1 text-sm ${currentQuality === -1 ? 'text-blue-500' : 'text-white'}`}
-                                        onClick={() => changeQuality(-1)}
-                                    >
-                                        Auto
-                                    </button>
-                                    {qualityLevels.map((level) => (
+                                    
+                                    <div className="max-h-48 py-1 overflow-auto custom-scrollbar">
                                         <button
-                                            key={level.id}
-                                            className={`w-full text-left px-3 py-1 text-sm ${currentQuality === level.id ? 'text-blue-500' : 'text-white'}`}
-                                            onClick={() => changeQuality(level.id)}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-800 transition-colors duration-150 flex items-center justify-between ${currentQuality === -1 ? 'text-blue-500 font-medium' : 'text-white'}`}
+                                            onClick={() => changeQuality(-1)}
                                         >
-                                            {level.name}
+                                            Auto
+                                            {currentQuality === -1 && (
+                                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M5 12L10 17L19 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            )}
                                         </button>
-                                    ))}
+                                        
+                                        {qualityLevels.map((level) => (
+                                            <button
+                                                key={level.id}
+                                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-800 transition-colors duration-150 flex items-center justify-between ${currentQuality === level.id ? 'text-blue-500 font-medium' : 'text-white'}`}
+                                                onClick={() => changeQuality(level.id)}
+                                            >
+                                                {level.name}
+                                                {currentQuality === level.id && (
+                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M5 12L10 17L19 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </>
@@ -224,7 +289,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     </div>
                 </div>
             </div>
-            <div className='absolute left-0 right-0 bottom-16 flex justify-center items-center'>
+            <div className='absolute z-22 left-0 right-0 bottom-16 flex justify-center items-center'>
                 <input
                     type="range"
                     min="0"

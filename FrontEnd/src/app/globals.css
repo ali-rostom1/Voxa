@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+/* Add this to your global CSS file */
+.custom-scrollbar {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #4B5563 transparent; /* Firefox */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px; /* Chrome, Safari, Edge */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent; /* Chrome, Safari, Edge */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #4B5563; /* Chrome, Safari, Edge */
+    border-radius: 3px;
+  }

@@ -69,7 +69,7 @@ class VideoController extends Controller
     public function show(string $id)
     {
         try{
-            $video = Video::with(['user','category'])->find($id);
+            $video = Video::with(['user','category'])->withCount('views')->find($id);
             if(!$video){
                 return response()->json([
                     'status' => 'error',

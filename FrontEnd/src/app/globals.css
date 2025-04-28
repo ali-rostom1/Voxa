@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Add this to your global CSS file */
 .custom-scrollbar {
     scrollbar-width: thin; /* Firefox */
     scrollbar-color: #4B5563 transparent; /* Firefox */
@@ -17,4 +16,10 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background-color: #4B5563; /* Chrome, Safari, Edge */
     border-radius: 3px;
+  }
+  
+  .video-details-transition {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
   }

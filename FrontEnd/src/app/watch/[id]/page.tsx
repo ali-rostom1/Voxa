@@ -82,17 +82,69 @@ export default function Watch() {
             const fetchReaction = async () => {
                 const response = await apiClient.get(`/api/v1/videos/${id}/my-reactions`);
                 if (response.status === 200) {
-                    const data = response.data.data;
-                    setIsLiked(data.is_liked);
-                    setIsDisliked(data.is_disliked);
-                    setIsSaved(data.is_saved);
-                    setIsSubscribed(data.is_subscribed);
+                    const data = response.data;
+                    setIsLiked(data.isLiked);
+                    setIsDisliked(data.is_disLiked);
+                    setIsSaved(data.isSaved);
+                    setIsSubscribed(data.isSubscribed);
                 } else {
                     console.error("Failed to fetch reactions");
                 }
             }
+            fetchReaction();
         }
-    });
+    },[video]);
+    const handleLike = async () => {
+        try {
+            setIsLiked(!isLiked);
+            setIsDisliked(false);
+            const response = await apiClient.post(`/api/v1/videos/${id}/like`);
+            if (response.status !== 200) {
+                setIsLiked(!isLiked);
+                console.error("Failed to like video");
+            }
+        } catch (err : any) {
+            console.error(err.message || "Failed to like video");
+        }
+    };
+    const handleDislike = async () => {
+        try {
+            setIsDisliked(!isDisliked);
+            setIsLiked(false);
+            const response = await apiClient.post(`/api/v1/videos/${id}/dislike`);
+            if (response.status !== 200) {
+                setIsDisliked(!isDisliked);
+                console.error("Failed to dislike video");
+            }
+        }
+        catch (err : any) {
+            console.error(err.message || "Failed to dislike video");
+        }
+    }
+    const handleSave = async () => {
+        try {
+            setIsSaved(!isSaved);
+            const response = await apiClient.get(`/api/v1/videos/${id}/save`);
+            if (response.status !== 200) {
+                setIsSaved(!isSaved);
+                console.error("Failed to save video");
+            } 
+        } catch (err : any) {
+            console.error(err.message || "Failed to save video");
+        }
+    }
+    const handleSubscribe = async () => {
+        try {
+            const response = await apiClient.post(`/api/v1/users/${video?.user}/subscribe`);
+            if (response.status === 200) {
+                setIsSubscribed(true);
+            } else {
+                console.error("Failed to subscribe to channel");
+            }
+        } catch (err : any) {
+            console.error(err.message || "Failed to subscribe to channel");
+        }
+    }
   return (
     <DefaultLayout>
         <div className="grid lg:grid-cols-3 sm:grid-cols-1 p-4">
@@ -100,7 +152,7 @@ export default function Watch() {
                 {video && (
                     <>
                         <VideoPlayer videoSrc={video.manifest_URL} />
-                        {/* <VideoDetails video={video} isDisliked={} isLiked={} isSaved={} isSubscribed={} onDislike={} onLike={} onSave={} onSubscribe={} /> */}
+                        <VideoDetails video={video} isDisliked={isDisliked} isLiked={isLiked} isSaved={isSaved} isSubscribed={isSubscribed} onDislike={handleDislike} onLike={handleLike} onSave={handleSave} onSubscribe={handleSubscribe} />
                     </>
                 )
                 }

@@ -50,6 +50,6 @@ class Video extends Model
     }
     public function savedByUsers()
     {
-        return $this->hasMany(User::class,'saved_videos');
+        return $this->belongsToMany(User::class,'saved_videos');
     }
 }

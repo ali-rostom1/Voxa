@@ -135,10 +135,10 @@ export default function Watch() {
     }
     const handleSubscribe = async () => {
         try {
-            const response = await apiClient.post(`/api/v1/users/${video?.user}/subscribe`);
-            if (response.status === 200) {
-                setIsSubscribed(true);
-            } else {
+            setIsSubscribed(!isSubscribed);
+            const response = await apiClient.get(`/api/v1/videos/${id}/subscribe`);
+            if (response.status !== 200) {
+                setIsSubscribed(!isSubscribed);
                 console.error("Failed to subscribe to channel");
             }
         } catch (err : any) {

@@ -45,6 +45,9 @@ export interface VoxaHeaderProps {
 export interface Video {
   id: string;
   title: string;
+  category_name: string;
+  description: string;
+  manifest_URL: string;
   user: string;
   views: number;
   uploadTime: string;

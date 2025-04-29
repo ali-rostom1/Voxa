@@ -65,7 +65,7 @@ class ReactionController extends Controller
         
         $video->reactions()->save($reaction);
         
-        return response()->json(['message' => 'Reaction added'], 201);
+        return response()->json(['message' => 'Reaction added'], 200);
     }
 
     public function getReactionCounts(Video $video)
@@ -80,6 +80,19 @@ class ReactionController extends Controller
                 ? $video->reactions()->where('user_id', Auth::id())->first()
                 : null
         ]);
+    }
+    public function saveVideo(Video $video)
+    {
+        /** @var App\Models\User $user */
+        $user = Auth::user();
+        if ($user->savedVideos()->where('video_id', $video->id)->exists()) {
+            $user->savedVideos()->detach($video->id);
+            return response()->json(['message' => 'Video unsaved'], 200);
+        }
+        
+        $user->savedVideos()->attach($video->id, ['created_at' => now(), 'updated_at' => now()]);
+        
+        return response()->json(['message' => 'Video saved successfully'], 200);
     }
  }
 

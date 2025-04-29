@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Video } from "@/types";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
+import { Link } from "lucide-react";
 
 interface VideoCardProps {
   video: Video;
@@ -32,6 +33,7 @@ export const VideoCard: FC<VideoCardProps> = ({ video, size = 'default' }) => {
   
   return (
     <div className="group w-full transition-all duration-500 hover:-translate-y-1 rounded-xl border border-gray-200 hover:border-gray-300 p-3 hover:shadow-md bg-white">
+      <Link href={`/watch/${video.id}`}>
       {/* Thumbnail Container */}
       <div className="relative w-full overflow-hidden rounded-lg bg-gradient-to-br from-gray-900 to-gray-800">
         {/* Aspect Ratio Container */}
@@ -86,6 +88,7 @@ export const VideoCard: FC<VideoCardProps> = ({ video, size = 'default' }) => {
           </div>
         </div>
       </div>
+      </Link>
     </div>
   );
 };

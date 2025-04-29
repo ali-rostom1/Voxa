@@ -179,7 +179,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
 
   return (
-    <div className=' lg:w-[70%] aspect-video rounded-3xl relative'>
+    <div className='w-full aspect-video rounded-3xl relative'>
         {isLoading && (
             <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20 rounded-xl">
             <Loader2 className="animate-spin text-white w-12 h-12" />

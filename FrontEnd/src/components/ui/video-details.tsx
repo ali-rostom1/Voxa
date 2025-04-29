@@ -76,29 +76,29 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
         {/* Action buttons */}
         <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
           <div className="flex rounded-full bg-gray-100 p-1">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors cursor-pointer" onClick={onLike}>
               {isLiked ? (
-                <ThumbsUp className="h-5 w-5 text-blue-600" onClick={onLike} />
+                <ThumbsUp className="h-5 w-5 text-blue-600"  />
               ) : (
-                <ThumbsUp className="h-5 w-5" onClick={onLike} />
+                <ThumbsUp className="h-5 w-5" />
               )}
               <span className="font-medium">24K</span>
             </button>
             <div className="w-px bg-gray-300 mx-1"></div>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors cursor-pointer" onClick={onDislike}>
               {isDisliked ? (
-                <ThumbsDown className="h-5 w-5 text-red-600" onClick={onDislike} />
+                <ThumbsDown className="h-5 w-5 text-red-600"  />
               ) : (
-                <ThumbsDown className="h-5 w-5" onClick={onDislike} />
+                <ThumbsDown className="h-5 w-5" />
               )}
             </button>
           </div>
 
-          <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer" onClick={onSave}>
             {isSaved ? (
-                <BookmarkPlus className="h-5 w-5 text-blue-600" onClick={onSave} />
+                <BookmarkPlus className="h-5 w-5 text-blue-600" />
                 ) : (
-                <BookmarkPlus className="h-5 w-5" onClick={onSave} />
+                <BookmarkPlus className="h-5 w-5"  />
                 )}
             <span className="font-medium">Save</span>
           </button>

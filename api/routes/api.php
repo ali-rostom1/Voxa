@@ -30,8 +30,8 @@ Route::prefix('v1')->group(function(){
         Route::post('/videos/{video}/like', [ReactionController::class, 'like']);
         Route::post('/videos/{video}/dislike', [ReactionController::class, 'dislike']);
         Route::get('/videos/{video}/reactions', [ReactionController::class, 'getReactionCounts']);
-
         Route::get('/videos/{id}/my-reactions', [ReactionController::class, 'getReactions']);
+        Route::get('/videos/{video}/save', [ReactionController::class, 'saveVideo']);
     });
     
 });

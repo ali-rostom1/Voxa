@@ -94,5 +94,18 @@ class ReactionController extends Controller
         
         return response()->json(['message' => 'Video saved successfully'], 200);
     }
+    public function subscribe(Video $video)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $channel = $video->user;
+        if ($user->subscriptions()->where('subscriber_id', $channel->id)->exists()) {
+            $user->subscriptions()->detach($channel->id);
+            return response()->json(['message' => 'Unsubscribed successfully'], 200);
+        } else {
+            $user->subscriptions()->attach($channel->id, ['created_at' => now(), 'updated_at' => now()]);
+            return response()->json(['message' => 'Subscribed successfully'], 200);
+        }
+    }
  }
 

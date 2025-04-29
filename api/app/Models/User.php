@@ -89,7 +89,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function savedVideos()
     {
-        return $this->hasMany(Video::class,'saved_videos');
+        return $this->belongsToMany(Video::class,'saved_videos');
     }
     public function friends()
     {

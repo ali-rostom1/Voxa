@@ -1,6 +1,6 @@
 import { Video } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { ThumbsUp, ThumbsDown, Share, Flag, MessageCircle, BookmarkPlus } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Share, Flag, MessageCircle, BookmarkPlus,Check } from "lucide-react";
 import { useState } from "react";
 
 interface VideoDetailsProps {
@@ -64,11 +64,11 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
           </div>
           {isSubscribed ? (
             <button onClick={onSubscribe} className="ml-4 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-full hover:bg-blue-700 transition-colors">
-                    Subscribed
+                    Subscribed <Check className="ml-2 h-4 w-4 inline-block" />
             </button>
             ): (
             <button onClick={onSubscribe} className="ml-4 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-full hover:bg-blue-700 transition-colors">
-                    Subscribed 
+                    Subscribe
             </button>
             )}
         </div>

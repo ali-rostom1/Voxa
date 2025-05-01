@@ -1,6 +1,5 @@
 "use client"
 import { DefaultLayout } from "@/components/layouts/DefaultLayout"
-import { ExploreMainSection } from "@/components/sections/explore-main-section"
 import VideoPlayer from "@/components/ui/video-player"
 import apiClient from "@/lib/apiClient"
 import { Video } from "@/types"
@@ -8,6 +7,7 @@ import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import {WatchOther} from "@/components/sections/watch-other"
 import { VideoDetails } from "@/components/ui/video-details"
+import  CommentSection  from "@/components/ui/comment-section"
 
 export default function Watch() {
     const {id} = useParams();
@@ -147,17 +147,18 @@ export default function Watch() {
     }
   return (
     <DefaultLayout>
-        <div className="grid lg:grid-cols-3 sm:grid-cols-1 p-4">
-            <div className="col-span-2 pr-4">
+        <div className="grid lg:grid-cols-4 sm:grid-cols-1 w-[90%] mx-auto py-4">
+            <div className="lg:col-span-3 col-span-4 pr-4">
                 {video && (
                     <>
                         <VideoPlayer videoSrc={video.manifest_URL} />
                         <VideoDetails video={video} isDisliked={isDisliked} isLiked={isLiked} isSaved={isSaved} isSubscribed={isSubscribed} onDislike={handleDislike} onLike={handleLike} onSave={handleSave} onSubscribe={handleSubscribe} />
+                        {/* <CommentSection/> */}
                     </>
                 )
                 }
             </div>
-            <div className="col-span-1 pl-4">
+            <div className="lg:col-span-1 col-span-4">
                 <WatchOther videos={videos}/>
             </div>
         </div>

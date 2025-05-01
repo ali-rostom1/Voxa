@@ -159,21 +159,47 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             videoPlayerRef.current.currentTime = time;
         }
     }
-    const changeQuality = (id : number) => {
-        if(hlsRef.current){
-            setWasPlayingBeforeChange(isPlaying);
-            setIsLoading(true);
-            if(isPlaying) {
-                videoPlayerRef.current?.pause();
-            }
-            hlsRef.current.currentLevel = id;
-            setCurrentQuality(id);
-            setShowQualityMenu(false);
-            if(id === -1){
-                setCurrentAutoQuality(null);
-            }
+    const changeQuality = (id: number) => {
+        if (!hlsRef.current || !videoPlayerRef.current) return;
+    
+        const wasPlaying = isPlaying;
+        setWasPlayingBeforeChange(wasPlaying);
+        setIsLoading(true);
+        
+        if (wasPlaying) {
+            videoPlayerRef.current.pause();
         }
-    }  
+    
+        // Store current time
+        const currentTime = videoPlayerRef.current.currentTime;
+    
+        // Change quality level
+        hlsRef.current.currentLevel = id;
+        setCurrentQuality(id);
+        setShowQualityMenu(false);
+        
+        if (id === -1) {
+            setCurrentAutoQuality(null);
+        }
+    
+        // When level is actually switched
+        const onLevelSwitched = () => {
+            // Seek to current time to force loading correct segment
+            videoPlayerRef.current!.currentTime = currentTime;
+            
+            // Resume playback if it was playing
+            if (wasPlaying) {
+                videoPlayerRef.current!.play()
+                    .then(() => setIsPlaying(true))
+                    .catch(e => console.error('Playback failed:', e));
+            }
+            
+            setIsLoading(false);
+            hlsRef.current!.off(Hls.Events.LEVEL_SWITCHED, onLevelSwitched);
+        };
+    
+        hlsRef.current.on(Hls.Events.LEVEL_SWITCHED, onLevelSwitched);
+    };
     const toggleQualityMenu = () => {
         setShowQualityMenu(!showQualityMenu);
     }

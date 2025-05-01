@@ -2,7 +2,8 @@ import { FC } from "react";
 import { Video } from "@/types";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
-import { Link } from "lucide-react";
+import Link from "next/link";
+
 
 interface VideoCardProps {
   video: Video;
@@ -10,6 +11,7 @@ interface VideoCardProps {
 }
 
 export const VideoCard: FC<VideoCardProps> = ({ video, size = 'default' }) => {
+  console.log(video);
   const formatViews = (views: number): string => {
     if (views >= 1000000) {
       return `${(views / 1000000).toFixed(1)}M`;

@@ -1,7 +1,6 @@
 import type React from "react"
 import "./globals.css"
 import type { Metadata } from "next"
-import { AuthProvider } from "@/context/AuthContext"
 
 export const metadata: Metadata = {
   title: "Voxa - Video Platform",
@@ -20,9 +19,7 @@ export default function RootLayout({
       <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
       </head>
       <body className="bg-gray-50">
-        <AuthProvider>
           {children}
-        </AuthProvider>
       </body>
     </html>
   )

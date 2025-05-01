@@ -20,7 +20,7 @@ class CategoryController extends Controller
                 'status' => 'success',
                 'message' => 'Successfully retrieved categories',
                 'data' => $categories,
-            ],201);
+            ],200);
         }catch(\Throwable $e){
             return response()->json([
                 'status' => 'error',

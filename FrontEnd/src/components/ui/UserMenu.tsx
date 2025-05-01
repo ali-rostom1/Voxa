@@ -3,13 +3,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { UserProfile } from '@/types';
-import { useAuth } from '@/context/AuthContext';
-
+import { useAuthStore } from '@/stores/AuthStore';
 
 export const UserMenu: FC<{ user: UserProfile | null }> = ({ user }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
-    const { logout } = useAuth();
+    const { logout } = useAuthStore();
   
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {

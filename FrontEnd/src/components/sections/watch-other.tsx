@@ -17,9 +17,8 @@ export const WatchOther: FC<WatchOtherProps> = ({videos}) => {
                     ))}
                 </>
             ) : (
-                <div className="flex items-center justify-center h-[70vh]">
-                    <p>No videos found</p>
-                </div>
+                <>
+                </>
             )}
         </div>
     );

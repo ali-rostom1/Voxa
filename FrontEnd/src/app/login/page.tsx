@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import apiClient from '@/lib/apiClient';
-import { useAuth } from '@/context/AuthContext';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { VideoIcon, ChatIcon, PlaylistIcon, LikeIcon, FacebookIcon, GoogleIcon, LinkedInIcon } from '@/components/ui/Icons';
+import { useAuthStore } from '@/stores/AuthStore';
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -17,7 +17,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const {login} = useAuth();
+  const {login} = useAuthStore();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -37,18 +37,20 @@ export default function Login() {
         password: formData.password,
         remember_me: formData.rememberMe
       });
-      Cookies.set('access_token', response.data.authorisation.access_token, {
+      const { access_token, refresh_token } = response.data.authorisation;
+      const { user } = response.data;
+      Cookies.set('access_token', access_token, {
         expires: formData.rememberMe ? 30 : undefined,
         sameSite: 'strict'
       });
       
-      if (response.data.authorisation.refresh_token) {
-        Cookies.set('refresh_token', response.data.authorisation.refresh_token, {
+      if (refresh_token) {
+        Cookies.set('refresh_token', refresh_token, {
           expires: formData.rememberMe ? 30 : undefined,
           sameSite: 'strict'
         });
       }
-      login(response.data.user);
+      login(access_token,user);
       router.push('/');
     } catch (err: any) {
       setError(

@@ -131,19 +131,7 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
           )}
         </div>
       )}
-
-      {/* Comments Section Preview */}
-      <div className="mt-6 border-t border-gray-200 pt-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Comments <span className="text-gray-500 text-base">3.2K</span>
-          </h2>
-          <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900">
-            <MessageCircle className="h-5 w-5" />
-            <span className="font-medium">Add comment</span>
-          </button>
-        </div>
-      </div>
+      
     </div>
   );
 }

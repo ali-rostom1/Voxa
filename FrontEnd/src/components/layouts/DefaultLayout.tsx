@@ -1,14 +1,11 @@
 'use client';
 
-import { SidebarStateInitializer } from '@/components/SidebarStateInitializer';
 import { SideBar } from '@/components/shared/SideBar';
 import { VoxaHeader } from '@/components/shared/header';
 
 export const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex h-screen">
-      <SidebarStateInitializer />
-      
+    <div className="flex h-screen">      
       <SideBar />
       
       <div className="flex-1 flex flex-col">

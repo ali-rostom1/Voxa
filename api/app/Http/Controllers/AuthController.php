@@ -88,28 +88,43 @@ class AuthController extends Controller
         
     }
     public function refresh()
-    {
-        try{
-            $refreshToken = request()->input('refresh_token');
-            if (!JWTAuth::setToken($refreshToken)->check()) {
-                throw new Exception("invalid Refresh token");
-            }
-            $newAccessToken = Auth::refresh();
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Successfully refreshed token',
-                'access_token' => $newAccessToken,
-                'refresh_token' => Auth::refresh(),
-            ]);
-        }catch(\Throwable $e){
+{
+    try {
+        $refreshToken = request()->input('refresh_token') ?: request()->bearerToken();
+
+        if (!$refreshToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'An internal server error ocurred while trying to refresh your token',
-                'error' => $e->getMessage(),
-            ],500);
+                'message' => 'Refresh token required'
+            ], 400);
         }
+
+        JWTAuth::setToken($refreshToken);
+
+        if (!JWTAuth::check()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid refresh token'
+            ], 401);
+        }
+
+        $newAccessToken = JWTAuth::refresh();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully refreshed token',
+            'access_token' => $newAccessToken,
+            'refresh_token' => $refreshToken,
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to refresh token',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
     public function me()
     {
         try{

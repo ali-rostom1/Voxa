@@ -1,0 +1,11 @@
+
+
+
+export const HistorySection = () => {
+
+    return (
+        <>
+        </>
+    );
+
+}

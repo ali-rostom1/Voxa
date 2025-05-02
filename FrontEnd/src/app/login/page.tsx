@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { VideoIcon, ChatIcon, PlaylistIcon, LikeIcon, FacebookIcon, GoogleIcon, LinkedInIcon } from '@/components/ui/Icons';
 import { useAuthStore } from '@/stores/AuthStore';
+import { UserProfile } from '@/types';
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -38,7 +39,12 @@ export default function Login() {
         remember_me: formData.rememberMe
       });
       const { access_token, refresh_token } = response.data.authorisation;
-      const { user } = response.data;
+      const  user: UserProfile = {
+        id: response.data.user.id,
+        name: response.data.user.name,
+        email: response.data.user.email,
+        pfp_path: response.data.user.pfp_path,
+      }
       Cookies.set('access_token', access_token, {
         expires: formData.rememberMe ? 30 : undefined,
         sameSite: 'strict'

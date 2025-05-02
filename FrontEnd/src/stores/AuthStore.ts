@@ -32,10 +32,18 @@ export const useAuthStore = create<AuthState>()(
           const token = Cookies.get('access_token');
           if (token) {
             const response = await apiClient.get('/api/v1/me'); 
+            const userData = response.data.data;
+            const user: UserProfile = {
+                id: userData.id,
+                name: userData.name || '',
+                email: userData.email,
+                pfp_path: userData.pfp_path || null,
+              };
+    
             set({
               token,
               isAuthenticated: true,
-              user: response.data.user,
+              user: user,
               loading: false,
             });
           } else {

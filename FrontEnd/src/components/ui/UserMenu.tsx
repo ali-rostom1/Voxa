@@ -3,12 +3,22 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { UserProfile } from '@/types';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/AuthStore';
+import Cookies from 'js-cookie';
 
 export const UserMenu: FC<{ user: UserProfile | null }> = ({ user }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const { logout } = useAuthStore();
+    const router = useRouter();
+
+    const handleLogout = () => {
+      Cookies.remove('access_token');
+      Cookies.remove('refresh_token');
+      logout();
+      router.push('/login');
+    }
   
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -69,15 +79,9 @@ export const UserMenu: FC<{ user: UserProfile | null }> = ({ user }) => {
                   Profile
                 </div>
               </Link>
-              <Link href="/settings">
-                <div className="flex items-center px-4 py-2 text-sm hover:bg-gray-800">
-                  <Settings size={16} className="mr-2" />
-                  Settings
-                </div>
-              </Link>
             </div>
             <div className="border-t border-gray-700 py-1">
-              <button onClick={logout} className="flex w-full items-center px-4 py-2 text-sm text-red-500 hover:bg-gray-800">
+              <button onClick={handleLogout} className="flex w-full items-center px-4 py-2 text-sm text-red-500 hover:bg-gray-800">
                 <LogOut size={16} className="mr-2" />
                 Sign Out
               </button>

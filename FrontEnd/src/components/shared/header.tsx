@@ -10,8 +10,10 @@ import { Category, VoxaHeaderProps } from '@/types';
 import { useSidebarStore } from '@/stores/SideBarState';
 import { useAuthStore } from '@/stores/AuthStore';
 import { UploadVideoModal } from '@/components/shared/upload-modal';
+import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/apiClient';
 import Link from 'next/link';
+import { ProtectedRoute } from '../protected-route';
 
 export const VoxaHeader: FC<VoxaHeaderProps> = ({
   className = '',
@@ -23,6 +25,7 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { toggleSidebar, isMobile } = useSidebarStore();
   const [categories, setCategories] = useState<Category[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -43,6 +46,11 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
     };
     fetchCategories();
   }, []);
+  const handleUploadButton = () => {
+    if(!isAuthenticated){
+      router.push('/login');
+    }
+  }
 
   return (
     <header
@@ -81,7 +89,7 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
           />
 
           <div onClick={() => setIsOpen(true)}>
-            <UploadButton isMobile={isMobile} />
+            <UploadButton isMobile={isMobile} handleClick={handleUploadButton}/>
           </div>
 
           {loading ? (
@@ -97,11 +105,13 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
           )}
         </div>
       </div>
-      <UploadVideoModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        categories={categories}
-      />
+      {isAuthenticated && (
+        <UploadVideoModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          categories={categories}
+        />)
+      }
       <div className="md:hidden py-2">
         <SearchBar onSearch={onSearch} />
       </div>

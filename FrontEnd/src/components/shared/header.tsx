@@ -1,7 +1,7 @@
 'use client';
 
-import { FC, useEffect, useState } from 'react';
-import { Search, Bell, Mail, Menu } from 'lucide-react';
+import { FC, use, useEffect, useState } from 'react';
+import { Search, Bell, Mail, Menu, User } from 'lucide-react';
 import { NotificationBadge } from '@/components/ui/NotificationBadge';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { UploadButton } from '@/components/ui/UploadButton';
@@ -11,6 +11,7 @@ import { useSidebarStore } from '@/stores/SideBarState';
 import { useAuthStore } from '@/stores/AuthStore';
 import { UploadVideoModal } from '@/components/shared/upload-modal';
 import apiClient from '@/lib/apiClient';
+import Link from 'next/link';
 
 export const VoxaHeader: FC<VoxaHeaderProps> = ({
   className = '',
@@ -88,7 +89,11 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
           ) : isAuthenticated ? (
             <UserMenu user={user} />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700" />
+            <Link href="/login">
+              <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                Sign In
+              </button>
+            </Link>
           )}
         </div>
       </div>

@@ -106,7 +106,7 @@ export const ExploreMainSection: FC = () => {
         );
     }
     return (
-        <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto h-full">
             <div className="flex items-center justify-between mb-6">
                 <CategoryFilter categories={categories} activeCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
 

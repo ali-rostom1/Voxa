@@ -22,9 +22,13 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({ children, isPublic = f
   }, [checkAuth]);
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && !isPublic) {
+    if (isAuthenticated && (pathname === '/login' || pathname === '/sign-up')) {
+        router.push('/');
+        return;
+    }
+    if (!isAuthenticated && !isPublic && pathname !== '/login') {
       const redirect = encodeURIComponent(`${pathname}${searchParams.toString() ? `?${searchParams}` : ''}`);
-      console.log('[ProtectedRoute] Redirecting to login:', redirect);
+      console.log('[ProtectedRoute] Unauthenticated user, redirecting to login:', redirect);
       router.push(`/login?redirect=${redirect}`);
     }
   }, [loading, isAuthenticated, isPublic, pathname, searchParams, router]);

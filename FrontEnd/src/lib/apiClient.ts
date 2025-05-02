@@ -59,7 +59,6 @@ apiClient.interceptors.response.use(
         Cookies.remove('access_token');
         Cookies.remove('refresh_token');
         useAuthStore.getState().logout();
-
         return Promise.reject(err);
       }
     }

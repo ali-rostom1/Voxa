@@ -7,7 +7,7 @@ import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import {WatchOther} from "@/components/sections/watch-other"
 import { VideoDetails } from "@/components/ui/video-details"
-import  CommentSection  from "@/components/ui/comment-section"
+// import  CommentSection  from "@/components/ui/comment-section"
 
 export default function Watch() {
     const {id} = useParams();

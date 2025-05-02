@@ -1,35 +1,41 @@
-"use Client"
+'use client';
 
-import { useAuthStore } from "@/stores/AuthStore";
-import { useRouter } from "next/navigation";
-import { FC, ReactNode, useEffect } from "react"
+import { useEffect, FC, ReactNode } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useAuthStore } from '@/stores/AuthStore';
 
-
-
-interface ProtectedRouteProps{
-    children: ReactNode;
+interface ProtectedRouteProps {
+  children: ReactNode;
+  isPublic?: boolean;
 }
 
+export const ProtectedRoute: FC<ProtectedRouteProps> = ({ children, isPublic = false }) => {
+  const { isAuthenticated, loading, checkAuth } = useAuthStore();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-export const ProtectedRoute: FC<ProtectedRouteProps> = ({children}) => {
-    const {isAuthenticated,loading,checkAuth} = useAuthStore();
-    const router = useRouter();
+  useEffect(() => {
+    checkAuth().catch((err) => {
+      console.error('[ProtectedRoute] checkAuth failed:', err);
+    });
+  }, [checkAuth]);
 
-    useEffect(() => {
-        checkAuth()
-    },[checkAuth]);
-
-    useEffect(()=>{
-        if(!loading && !isAuthenticated){
-            router.push('login');
-        }
-    },[loading,isAuthenticated,router]);
-
-    if (loading) {
-        return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  useEffect(() => {
+    if (!loading && !isAuthenticated && !isPublic) {
+      const redirect = encodeURIComponent(`${pathname}${searchParams.toString() ? `?${searchParams}` : ''}`);
+      console.log('[ProtectedRoute] Redirecting to login:', redirect);
+      router.push(`/login?redirect=${redirect}`);
     }
-    if (!isAuthenticated) {
-        return null;
-    }
-    return <>{children}</>;
-}
+  }, [loading, isAuthenticated, isPublic, pathname, searchParams, router]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen text-gray-600">Loading...</div>;
+  }
+
+  if (!isAuthenticated && !isPublic) {
+    return null;
+  }
+
+  return <>{children}</>;
+};

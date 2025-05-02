@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
+import { Suspense } from "react";
+import { ProtectedRoute } from "@/components/protected-route";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <div
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </div>
-
+    <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-600">Loading...</div>}>
+          <ProtectedRoute isPublic>
+        <div
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          {children}
+        </div>
+      </ProtectedRoute>
+    </Suspense>
   );
 }

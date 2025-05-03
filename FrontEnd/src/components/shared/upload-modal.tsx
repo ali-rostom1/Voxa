@@ -29,8 +29,6 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
     video_upload: null
   });
   
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false); 
   
@@ -41,32 +39,11 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
   
   const handleCategorySelect = (categoryId: number) => {
     setFormData(prev => ({ ...prev, category_id: categoryId }));
-    console.log(formData);
-    setIsDropdownOpen(false);
   };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFormData(prev => ({ ...prev, video_upload: e.target.files![0] }));
-    }
-  };
-  
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-  
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-  
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFormData(prev => ({ ...prev, video_upload: e.dataTransfer.files[0] }));
     }
   };
   
@@ -77,20 +54,20 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    try{
-      const repsonse = await apiClient.post('api/v1/videos',formData,{
-          headers:{
-              'Content-Type': 'multipart/form-data',
-          },
+    try {
+      const response = await apiClient.post('api/v1/videos', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      if (repsonse.status === 201) {
-        onClose();
+      if (response.status === 201) {
         setFormData({
           title: '',
           description: '',
           category_id: categories.length > 0 ? categories[0].id : null,
           video_upload: null
         });
+        onClose();
         Swal.fire({
           position: "bottom-right",
           icon: "success",
@@ -99,27 +76,26 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
           timer: 1500
         });
       } else {
-        console.error('Error uploading video:', repsonse.data.message);
+        console.error('Error uploading video:', response.data.message);
       }
     } catch (error) {
       console.error('Error uploading video:', error);
-    }finally {
+    } finally {
       setIsSubmitting(false);
     }
   };
   
   if (!isOpen) return null;
   
-  const selectedCategory = categories.find(cat => cat.id === formData.category_id);
-  
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="w-full max-w-lg sm:max-w-md bg-white rounded-lg shadow-xl p-6 sm:p-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Upload Video</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Upload Video</h2>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 focus:outline-none"
+            aria-label="Close modal"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -130,12 +106,9 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
         <form onSubmit={handleSubmit}>
           {/* Video Upload Area */}
           <div 
-            className={`mb-4 p-4 border-2 border-dashed rounded-lg text-center cursor-pointer ${
-              isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'
-            } ${formData.video_upload ? 'bg-green-50 border-green-400' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
+            className={`mb-4 p-4 border-2 border-gray-300 rounded-lg text-center cursor-pointer hover:border-blue-400 ${
+              formData.video_upload ? 'bg-green-50 border-green-400' : ''
+            }`}
             onClick={triggerFileInput}
           >
             <input 
@@ -151,7 +124,7 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
                 <svg className="w-8 h-8 mx-auto text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <p className="text-sm text-gray-600">{formData.video_upload.name}</p>
+                <p className="text-sm text-gray-600 truncate">{formData.video_upload.name}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {(formData.video_upload.size / (1024 * 1024)).toFixed(2)} MB
                 </p>
@@ -161,7 +134,7 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
                 <svg className="w-10 h-10 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <p className="text-sm font-medium text-gray-700">Drag and drop your video or click to browse</p>
+                <p className="text-sm font-medium text-gray-700">Click to browse for a video</p>
                 <p className="text-xs text-gray-500 mt-1">MP4, WebM, MOV up to 100MB</p>
               </div>
             )}
@@ -210,17 +183,17 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
           </div>
           
           {/* Submit Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 mr-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+              className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center ${
                 !formData.video_upload || !formData.title ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               disabled={!formData.video_upload || !formData.title}

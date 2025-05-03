@@ -326,9 +326,10 @@ class VideoController extends Controller
             ], 500);
         }
     }
-    public function getHistory()
+    public function getHistory(Request $request)
     {
         try{
+            $perPage = $request->input('perPage') ?? 5;
             /** @var App\Model\User $user */
             $user = Auth::user();
             $videos = $user->history()->with(['user', 'category'])
@@ -336,7 +337,7 @@ class VideoController extends Controller
             ->withCount(['views' => function($query){
                 $query->withTrashed();
             }])
-            ->paginate(10);
+            ->paginate($perPage);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully retrieved video history',

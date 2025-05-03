@@ -4,9 +4,10 @@ import VideoPlayer from "@/components/ui/video-player";
 import apiClient from "@/lib/apiClient";
 import { Video } from "@/types";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { WatchOther } from "@/components/sections/watch-other";
 import { VideoDetails } from "@/components/ui/video-details";
+import { ProtectedRoute } from "@/components/protected-route";
 // import CommentSection from "@/components/ui/comment-section";
 
 export default function Watch() {
@@ -51,34 +52,6 @@ export default function Watch() {
         }
       } catch (err: any) {
         console.error(err.message || "Failed to fetch video");
-      }
-    };
-
-    const fetchVideos = async () => {
-      try {
-        const response = await apiClient.post("/api/v1/videos/filter", {
-          category_name: video?.category_name || "", 
-          order_by: "Views",
-        });
-        if (response.status === 200) {
-          const data = response.data.data.data.map((video: any) => ({
-            id: video.id,
-            title: video.title,
-            category_name: video.category.name,
-            description: video.description,
-            user: { name: video.user.name }, // Adjusted to match Video type
-            thumbnail: video.thumbnail_path,
-            views: video.views_count,
-            uploadTime: video.created_at,
-            duration: video.duration,
-            channelAvatar: video.user.pfp_path,
-          }));
-          setVideos(data || []);
-        } else {
-          console.error("Failed to fetch videos");
-        }
-      } catch (err: any) {
-        console.error(err.message || "Failed to fetch videos");
       }
     };
 
@@ -199,6 +172,8 @@ export default function Watch() {
   };
 
   return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-600">Loading...</div>}>
+    <ProtectedRoute isPublic>
     <DefaultLayout>
       <div className="flex flex-col lg:flex-row gap-6 p-4 min-h-screen max-w-7xl mx-auto">
         {/* Video Player and Details */}
@@ -230,5 +205,7 @@ export default function Watch() {
         </div>
       </div>
     </DefaultLayout>
+    </ProtectedRoute>
+    </Suspense>
   );
 }

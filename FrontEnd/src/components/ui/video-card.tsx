@@ -11,6 +11,7 @@ interface VideoCardProps {
 }
 
 export const VideoCard: FC<VideoCardProps> = ({ video, size = 'default' }) => {
+  console.log(video);
   const formatViews = (views: number): string => {
     if (views >= 1000000) {
       return `${(views / 1000000).toFixed(1)}M`;
@@ -58,11 +59,11 @@ export const VideoCard: FC<VideoCardProps> = ({ video, size = 'default' }) => {
       {/* Content Section - Carefully aligned grid */}
       <div className="mt-3 flex items-start">
         {/* Channel Avatar - Perfectly aligned */}
-        {video.channelAvatar && (
+        {video.user.pfp_path && (
           <div className="flex-shrink-0 mr-3 mt-0.5">
             <div 
               className={`${isLarge ? 'w-9 h-9' : 'w-8 h-8'} rounded-full bg-cover bg-center border border-gray-100 shadow-sm`} 
-              style={{ backgroundImage: `url(${video.channelAvatar})` }}
+              style={{ backgroundImage: `url(${video.user.pfp_path})` }}
             />
           </div>
         )}
@@ -76,7 +77,7 @@ export const VideoCard: FC<VideoCardProps> = ({ video, size = 'default' }) => {
           
           {/* Channel Name - Exact spacing */}
           <p className="text-gray-600 text-xs mb-1">
-            {video.user}
+            {video.user.name}
           </p>
           
           {/* Stats - Precisely aligned */}

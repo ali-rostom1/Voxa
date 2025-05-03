@@ -319,4 +319,24 @@ class VideoController extends Controller
             ], 500);
         }
     }
+    public function getHistory()
+    {
+        try{
+            /** @var App\Model\User $user */
+            $user = Auth::user();
+            $videos = $user->history()->with(['user', 'category'])->paginate(10);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Successfully retrieved video history',
+                'data' => $videos,
+            ], 200);
+        }catch(\Throwable $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve video history.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
 }

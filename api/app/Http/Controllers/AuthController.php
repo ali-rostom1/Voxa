@@ -100,21 +100,32 @@ class AuthController extends Controller
         }
 
         JWTAuth::setToken($refreshToken);
-
-        if (!JWTAuth::check()) {
+        $payload = JWTAuth::getPayload();
+        
+        if ($payload['token_type'] !== 'refresh') {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Invalid refresh token'
             ], 401);
         }
-
-        $newAccessToken = JWTAuth::refresh();
+        $user = JWTAuth::authenticate();
+        if(!$user){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid refresh token'
+            ], 401);
+        }
+        $newAccessToken = JWTAuth::fromUser($user);
+        $newRefreshToken = JWTAuth::customClaims([
+            'exp' => now()->addDays(30)->timestamp,
+            'token_type' => 'refresh'
+        ])->fromUser($user);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully refreshed token',
             'access_token' => $newAccessToken,
-            'refresh_token' => $refreshToken,
+            'refresh_token' => $newRefreshToken,
         ], 200);
 
     } catch (\Exception $e) {

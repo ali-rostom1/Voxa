@@ -45,17 +45,6 @@ const SidebarItem: FC<SidebarItemProps> = ({
   );
 };
 
-const LoadingSkeleton = () => (
-  <div className="animate-pulse px-3">
-    {[1, 2, 3].map((i) => (
-      <div key={i} className="flex items-center p-3 mb-2">
-        <div className="w-5 h-5 bg-gray-600 rounded-lg"></div>
-        <div className="ml-3 h-4 bg-gray-600 rounded w-20"></div>
-      </div>
-    ))}
-  </div>
-);
-
 export const SideBar = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const pathname = usePathname();
@@ -125,7 +114,7 @@ export const SideBar = () => {
           </div>
 
           <nav className="flex-1 overflow-y-auto py-4">
-            <div className={`space-y-1 px-3 ${collapsed ? 'items-center' : ''}`}>
+            <div className={`flex flex-col gap-1 px-3 ${collapsed ? 'items-center' : ''}`}>
               {/* Static items */}
               {staticNavItems.map((item) => (
                 <SidebarItem

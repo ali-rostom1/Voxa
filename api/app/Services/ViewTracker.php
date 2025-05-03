@@ -16,9 +16,11 @@ class ViewTracker
         }
         $lastView = View::where('video_id', $video->id)
             ->where('user_id', Auth::id())
-            ->exists();
+            ->withTrashed()
+            ->first();
 
         if ($lastView) {
+            $lastView->trashed() ? $lastView->restore() : $lastView->update(['viewed_at' => now()]);
             return false;
         }
 

@@ -17,18 +17,25 @@ export default function Watch() {
     const [isDisliked,setIsDisliked] = useState(false);
     const [isSaved,setIsSaved] = useState(false);
     const [isSubscribed,setIsSubscribed] = useState(false);
+    const [likes, setLikes] = useState(0);
     useEffect(() => {
         const fetchVideo = async () => {
             try {
                 const response = await apiClient.get(`/api/v1/videos/${id}`);
                 if (response.status === 201) {
                     const video = response.data.data;
+                    const user = {
+                        id: video.user.id,
+                        name: video.user.name,
+                        email: video.user.email,
+                        pfp_path: video.user.pfp_path,
+                    }
                    const data = {
                         id: video.id,
                         title: video.title,
                         description: video.description,
                         category_name: video.category.name,
-                        user: video.user.name,
+                        user: user,
                         thumbnail: video.thumbnail_path,
                         manifest_URL: video.manifest_url, 
                         views: video.views_count,
@@ -36,6 +43,7 @@ export default function Watch() {
                         duration: video.duration,
                         channelAvatar: video.user.pfp_path,
                     }
+                    setLikes(video.likes_count);
                     setVideo(data || null);
 
                 } else {
@@ -97,6 +105,7 @@ export default function Watch() {
     const handleLike = async () => {
         try {
             setIsLiked(!isLiked);
+            setLikes(isLiked ? likes - 1 : likes + 1);
             setIsDisliked(false);
             const response = await apiClient.post(`/api/v1/videos/${id}/like`);
             if (response.status !== 200) {
@@ -152,7 +161,7 @@ export default function Watch() {
                 {video && (
                     <>
                         <VideoPlayer videoSrc={video.manifest_URL} />
-                        <VideoDetails video={video} isDisliked={isDisliked} isLiked={isLiked} isSaved={isSaved} isSubscribed={isSubscribed} onDislike={handleDislike} onLike={handleLike} onSave={handleSave} onSubscribe={handleSubscribe} />
+                        <VideoDetails video={video} isDisliked={isDisliked} isLiked={isLiked} isSaved={isSaved} isSubscribed={isSubscribed} onDislike={handleDislike} onLike={handleLike} onSave={handleSave} onSubscribe={handleSubscribe} likes={likes} />
                         {/* <CommentSection/> */}
                     </>
                 )

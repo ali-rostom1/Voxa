@@ -54,7 +54,7 @@ export const HorizontalVideoCard: FC<VideoCardProps> = ({ video, size = 'default
         <div className="flex flex-col">
           {/* Channel Name */}
           <p className="text-gray-600 text-xs mb-0.5">
-            {video.user}
+            {video.user.name}
           </p>
           
           {/* Stats */}

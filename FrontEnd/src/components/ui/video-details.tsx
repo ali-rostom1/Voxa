@@ -1,6 +1,7 @@
 import { Video } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { ThumbsUp, ThumbsDown, Share, Flag, MessageCircle, BookmarkPlus,Check } from "lucide-react";
+import { useAuthStore } from "@/stores/AuthStore";
 import { useState } from "react";
 
 interface VideoDetailsProps {
@@ -13,12 +14,12 @@ interface VideoDetailsProps {
     onDislike: () => void;
     isSaved: boolean;
     onSave: () => void;
-
+    likes: number;
 }
 
-export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isDisliked,onDislike,isSaved,onSave }: VideoDetailsProps) {
+export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isDisliked,onDislike,isSaved,onSave,likes }: VideoDetailsProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-
+  const { user } = useAuthStore((state) => state);
   const formatViews = (views: number): string => {
     if (views >= 1000000) {
       return `${(views / 1000000).toFixed(1)}M`;
@@ -40,11 +41,11 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
         {/* Channel info */}
         <div className="flex items-center gap-4">
           <div className="relative group">
-            {video.channelAvatar && (
+            {video.user.pfp_path && (
               <div className="h-12 w-12 rounded-full overflow-hidden ring-2 ring-offset-2 ring-gray-100">
                 <img 
-                  src={video.channelAvatar} 
-                  alt={video.user}
+                  src={video.user.pfp_path} 
+                  alt={video.user.name}
                   className="h-full w-full object-cover transform transition group-hover:scale-110"
                 />
               </div>
@@ -52,7 +53,7 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition">
-              {video.user}
+              {video.user.name}
             </h3>
             <p className="text-sm text-gray-500">
               {formatViews(video.views)} views • {
@@ -66,11 +67,11 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
             <button onClick={onSubscribe} className="ml-4 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-full hover:bg-blue-700 transition-colors">
                     Subscribed <Check className="ml-2 h-4 w-4 inline-block" />
             </button>
-            ): (
+            ): video.user.id !== user?.id ? (
             <button onClick={onSubscribe} className="ml-4 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-full hover:bg-blue-700 transition-colors">
                     Subscribe
             </button>
-            )}
+            ) : null}
         </div>
 
         {/* Action buttons */}
@@ -82,7 +83,7 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
               ) : (
                 <ThumbsUp className="h-5 w-5" />
               )}
-              <span className="font-medium">24K</span>
+              <span className="font-medium">{formatViews(likes)}</span>
             </button>
             <div className="w-px bg-gray-300 mx-1"></div>
             <button className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors cursor-pointer" onClick={onDislike}>

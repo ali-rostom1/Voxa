@@ -6,6 +6,7 @@ import apiClient from "@/lib/apiClient";
 import { HorizontalVideoCard } from "../ui/horizontal-video-card";
 import Swal from 'sweetalert2'
 import { Trash2 } from 'lucide-react';
+import Pagination from "../ui/pagination";
 
 
 
@@ -17,10 +18,17 @@ export const HistorySection = () => {
     const [isEmpty,setIsEmpty] = useState(false);
     const [isClearing,setIsClearing] = useState(false);
     const [isCleared,setIsCleared] = useState(false);
+    const [page,setPage] = useState(1);
+    const [perPage,setPerPage] = useState(5);
+    const [totalPages,setTotalPages] = useState(1);
+
     useEffect(() => {
         try {
             const fetchVideos = async () => {
-                const response = await apiClient.get('/api/v1/videos/history/me');
+                const response = await apiClient.post('/api/v1/videos/history/me',{
+                    page: page,
+                    perPage: perPage,
+                });
                 if (response.status === 200) {
                     const data = response.data.data.data.map((video: any) => ({
                         id: video.id,
@@ -38,7 +46,7 @@ export const HistorySection = () => {
                         uploadTime: video.created_at,
                         duration: video.duration,
                     }));
-                    console.log(data);
+                    setTotalPages(Math.ceil(response.data.data.total/perPage))
                     setVideos(data || []);
                     setLoading(false);
                 } else {
@@ -53,7 +61,7 @@ export const HistorySection = () => {
         finally {
             setLoading(false);
         }
-    }, [isCleared]);
+    }, [isCleared,page]);
     const handleClearHistory = async () => {
         Swal.fire({
             title: "Are you sure?",
@@ -112,6 +120,14 @@ export const HistorySection = () => {
                 ) : (
                     <div className=" text-center">No videos found</div>
                 )}
+                {!loading && !error && videos && videos.length > 0 && (
+                    <Pagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        onPageChange={(page) => {
+                            setPage(page);
+                        }}/>
+                    )}
             </div>
         </section>
     );

@@ -46,7 +46,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoSrc, poster, onEnded }) 
         setCurrentQuality(-1);
       });
 
-      hls.on(Hls.Events.ERROR, (event, data) => console.error('HLS error:', data));
+      hls.on(Hls.Events.ERROR, (event, data) => console.error('HLS error:',event ,data));
 
       const video = videoPlayerRef.current;
       video.addEventListener('canplay', () => setIsLoading(false));
@@ -164,7 +164,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoSrc, poster, onEnded }) 
                 {isPlaying ? <PauseIcon className="w-6 h-6 text-white" /> : <PlayIcon className="w-6 h-6 text-white" />}
               </button>
               <span className="text-white text-sm">
-                {videoPlayerRef.current ? formatTime(videoPlayerRef.current.currentTime) : '0:00'}
+                {videoPlayerRef.current ? formatTime(videoPlayerRef.current.currentTime) : '0:00'} / {videoPlayerRef.current && !isNaN(videoPlayerRef.current.duration) ? formatTime(videoPlayerRef.current.duration) : '0:00'}
               </span>
               <button onClick={toggleMute}>
                 {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}

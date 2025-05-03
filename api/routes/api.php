@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function(){
         Route::get('/videos/{id}/my-reactions', [ReactionController::class, 'getReactions']);
         Route::get('/videos/{video}/save', [ReactionController::class, 'saveVideo']);
         Route::get('/videos/{video}/subscribe',[ReactionController::class, 'subscribe']);
+        Route::get('/videos/history/me',[VideoController::class, 'getHistory']);
     });
     
 });

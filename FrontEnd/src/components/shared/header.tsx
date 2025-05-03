@@ -1,7 +1,7 @@
 'use client';
 
-import { FC, use, useEffect, useState } from 'react';
-import { Search, Bell, Mail, Menu, User } from 'lucide-react';
+import { FC, useEffect, useState } from 'react';
+import { Search, Bell, Mail, Menu } from 'lucide-react';
 import { NotificationBadge } from '@/components/ui/NotificationBadge';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { UploadButton } from '@/components/ui/UploadButton';
@@ -22,7 +22,7 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
 }) => {
   const { user, isAuthenticated, loading } = useAuthStore();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { toggleSidebar, isMobile } = useSidebarStore();
+  const { toggleSidebar, isMobile,collapsed } = useSidebarStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const router = useRouter();
 
@@ -31,11 +31,10 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
       try {
         const response = await apiClient.get('/api/v1/categories');
         if (response.status === 200) {
-          const data = response.data.data.data.map((category: any) => ({
+          setCategories(response.data.data.data.map((category: any) => ({
             id: category.id,
             title: category.name,
-          }));
-          setCategories(data || []);
+          })));
         } else {
           console.error('Failed to fetch categories');
         }
@@ -45,37 +44,47 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
     };
     fetchCategories();
   }, []);
+
   const handleUploadButton = () => {
-    if(!isAuthenticated){
+    if (!isAuthenticated) {
       router.push('/login');
+    } else {
+      setIsOpen(true);
     }
-  }
+  };
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 ${className}`}
+      className={`sticky top-0 z-10 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 ${className}`}
     >
       <div className="flex items-center justify-between h-16">
         <div className="flex items-center">
-          <button
-            onClick={toggleSidebar}
-            className="p-2 mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            {isMobile ? (
-              <Menu size={20} className="text-gray-600 dark:text-gray-300" />
-            ) : null}
-          </button>
+          {
+            isMobile && (
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <Menu size={20} className="text-gray-600 dark:text-gray-300" />
+              </button>
+            )
+          }
+          {!isMobile && collapsed ? (
+            <Link href="/" className="ml-2 text-xl font-bold text-blue-600">
+            Voxa
+          </Link>
+          ) : null}
+          
         </div>
-        <div className="hidden md:block flex-grow max-w-xl">
+
+        <div className="hidden md:flex flex-grow max-w-xl mx-4">
           <SearchBar onSearch={onSearch} />
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="md:hidden">
-            <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-              <Search size={20} />
-            </button>
-          </div>
+          <button className="md:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+            <Search size={20} className="text-gray-600 dark:text-gray-300" />
+          </button>
 
           <NotificationBadge
             count={notifications}
@@ -87,9 +96,7 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
             icon={<Mail size={20} className="text-gray-600 dark:text-gray-300" />}
           />
 
-          <div onClick={() => setIsOpen(true)}>
-            <UploadButton isMobile={isMobile} handleClick={handleUploadButton}/>
-          </div>
+          <UploadButton isMobile={isMobile} handleClick={handleUploadButton} />
 
           {loading ? (
             <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
@@ -97,20 +104,22 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
             <UserMenu user={user} />
           ) : (
             <Link href="/login">
-              <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                 Sign In
               </button>
             </Link>
           )}
         </div>
       </div>
+
       {isAuthenticated && (
         <UploadVideoModal
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
           categories={categories}
-        />)
-      }
+        />
+      )}
+
       <div className="md:hidden py-2">
         <SearchBar onSearch={onSearch} />
       </div>

@@ -131,4 +131,8 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Video::class,'views','user_id','video_id')
                     ->orderBy('viewed_at','desc');
     }
+    public function views()
+    {
+        return $this->hasMany(View::class);
+    }
 }

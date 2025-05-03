@@ -13,7 +13,6 @@ import { UploadVideoModal } from '@/components/shared/upload-modal';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/apiClient';
 import Link from 'next/link';
-import { ProtectedRoute } from '../protected-route';
 
 export const VoxaHeader: FC<VoxaHeaderProps> = ({
   className = '',

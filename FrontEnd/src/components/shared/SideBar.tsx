@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, FC, ReactElement } from 'react';
+import { FC, ReactElement } from 'react';
 import Link from 'next/link';
-import { usePathname,useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { NavItem, SidebarItemProps } from '@/types';
 import { useSidebarStore } from '@/stores/SideBarState';
 import {
@@ -32,20 +32,18 @@ const SidebarItem: FC<SidebarItemProps> = ({
   return (
     <Link href={href}>
       <div
-        className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-blue-900 ${
+        className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-blue-900 ${
           active ? 'bg-blue-900 text-blue-400' : 'text-gray-300'
-        }`}
+        } ${collapsed ? 'justify-center' : ''}`}
       >
-        <div className="flex items-center justify-center">
-          <Icon size={20} />
-        </div>
+        <Icon size={20} />
         {!collapsed && <span className="ml-3">{label}</span>}
       </div>
     </Link>
   );
 };
 
-export const SideBar = () => {
+export const SideBar: FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
@@ -56,14 +54,12 @@ export const SideBar = () => {
     { icon: Compass, label: 'Explore', href: '/explore' },
     { icon: TrendingUp, label: 'Trending', href: '/trending' },
     { icon: History, label: 'History', href: '/history' },
-    { icon: Bookmark , label: 'Saved' , href: '/saved'},
-    { icon: ThumbsUpIcon , label: 'Liked', href: '/liked'},
-    { icon: ListMusic  , label: 'Playlists' , href: '/playlists'}
+    { icon: Bookmark, label: 'Saved', href: '/saved' },
+    { icon: ThumbsUpIcon, label: 'Liked', href: '/liked' },
+    { icon: ListMusic, label: 'Playlists', href: '/playlists' },
   ];
 
-
   const handleLogout = () => {
-    // Clear cookies
     Cookies.remove('access_token');
     Cookies.remove('refresh_token');
     logout();
@@ -71,28 +67,18 @@ export const SideBar = () => {
   };
 
   const sidebarClasses = `
-    fixed top-0 left-0 h-full bg-gray-900 shadow-lg
-    transition-all duration-300 z-101
-    ${isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
-    ${collapsed && !isMobile ? 'w-16' : 'w-64'}
+    bg-gray-900 shadow-lg h-screen transition-all duration-300
+    ${isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'sticky top-0 '}
+    ${isMobile ? 'fixed top-0 left-0 w-64 z-20' : collapsed ? 'w-16' : 'w-64'}
   `;
 
   return (
     <>
       {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="fixed inset-0 bg-black bg-opacity-50 z-10"
           onClick={closeSidebar}
         />
-      )}
-
-      {isMobile && !sidebarOpen && (
-        <button
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 p-2 rounded-full bg-blue-600 text-white"
-        >
-          <ChevronRight size={20} />
-        </button>
       )}
 
       <aside className={sidebarClasses}>
@@ -114,8 +100,7 @@ export const SideBar = () => {
           </div>
 
           <nav className="flex-1 overflow-y-auto py-4">
-            <div className={`flex flex-col gap-1 px-3 ${collapsed ? 'items-center' : ''}`}>
-              {/* Static items */}
+            <div className={`flex flex-col gap-1 px-3 ${collapsed && !isMobile ? 'items-center' : ''}`}>
               {staticNavItems.map((item) => (
                 <SidebarItem
                   key={item.href}
@@ -123,46 +108,38 @@ export const SideBar = () => {
                   label={item.label}
                   href={item.href}
                   active={pathname === item.href}
-                  collapsed={collapsed}
+                  collapsed={collapsed && !isMobile}
                 />
               ))}
             </div>
           </nav>
 
-          {isAuthenticated ? (
-            <div className="p-4 border-t border-gray-700">
+          <div className="p-4 border-t border-gray-700">
+            {isAuthenticated ? (
               <button
                 onClick={handleLogout}
-                className={`flex items-center justify-center w-full p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors ${
-                  collapsed ? 'p-2' : 'py-2 px-4'
+                className={`flex items-center w-full p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 ${
+                  collapsed && !isMobile ? 'justify-center' : 'py-2 px-4'
                 }`}
               >
                 <LogOut size={18} />
                 {!collapsed && <span className="ml-2">Sign Out</span>}
               </button>
-            </div>
-          ) : (
-            <div className="p-4 border-t border-gray-700">
+            ) : (
               <Link href="/login">
                 <button
-                  className={`flex items-center justify-center w-full p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${
-                    collapsed ? 'p-2' : 'py-2 px-4'
+                  className={`flex items-center w-full p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ${
+                    collapsed && !isMobile ? 'justify-center' : 'py-2 px-4'
                   }`}
                 >
                   <LogIn size={18} />
                   {!collapsed && <span className="ml-2">Sign In</span>}
                 </button>
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </aside>
-
-      <div
-        className={`transition-all duration-300 ${
-          isMobile ? 'ml-0' : collapsed ? 'ml-16' : 'ml-64'
-        }`}
-      ></div>
     </>
   );
 };

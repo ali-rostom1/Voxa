@@ -338,5 +338,22 @@ class VideoController extends Controller
             ], 500);
         }
     }
-    
+    public function clearHistory()
+    {
+        try{
+            /** @var App\Model\User $user */
+            $user = Auth::user();
+            $user->history()->detach();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Successfully cleared video history',
+            ], 200);
+        }catch(\Throwable $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to clear video history.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

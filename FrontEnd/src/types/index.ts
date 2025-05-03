@@ -48,10 +48,9 @@ export interface Video {
   category_name: string;
   description: string;
   manifest_URL: string;
-  user: string;
+  user: UserProfile;
   views: number;
   uploadTime: string;
   duration: string;
   thumbnail: string;
-  channelAvatar?: string;
 }

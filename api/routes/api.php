@@ -34,7 +34,7 @@ Route::prefix('v1')->group(function(){
         Route::get('/videos/{video}/save', [ReactionController::class, 'saveVideo']);
         Route::get('/videos/{video}/subscribe',[ReactionController::class, 'subscribe']);
         Route::get('/videos/history/me',[VideoController::class, 'getHistory']);
-        Route::get('/videos/history/clear',[VideoController::class, 'clearHistory']);
+        Route::delete('/videos/history/clear',[VideoController::class, 'clearHistory']);
     });
 });
 

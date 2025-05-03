@@ -9,7 +9,7 @@ interface WatchOtherProps {
 
 export const WatchOther: FC<WatchOtherProps> = ({videos}) => {
     return (
-        <div className="flex flex-col items-center w-full h-full">
+        <div className="flex flex-col items-center w-full h-full gap-3">
             {videos.length > 0 ? (
                 <>
                     {videos.map((video) => (

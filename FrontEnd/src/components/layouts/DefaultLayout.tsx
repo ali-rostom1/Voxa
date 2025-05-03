@@ -14,7 +14,7 @@ export const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
       ) : null}
       <div className="flex-1 flex flex-col">
         <VoxaHeader />
-        <main className={`flex-1 overflow-y-auto p-4 ${!isMobile && !collapsed ? 'ml-16' : !isMobile && collapsed ? '' : ''}`}>
+        <main className={`flex-1 overflow-y-auto p-4 ${!isMobile && !collapsed ? 'ml-8' : !isMobile && collapsed ? '' : ''}`}>
           {children}
         </main>
       </div>

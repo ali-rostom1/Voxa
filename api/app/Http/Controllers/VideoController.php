@@ -19,8 +19,13 @@ class VideoController extends Controller
     public function index()
     {
         try{
-            $videos = Video::with(['user','category'])->inRandomOrder()->paginate(10);
-            $videos->loadCount('views');
+            $videos = Video::with(['user','category'])
+            ->withCount(['views' => function($query){
+                $query->withThrashed();
+            }])
+            ->inRandomOrder()
+            ->paginate(10);
+        
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully retrieved videos',
@@ -276,7 +281,9 @@ class VideoController extends Controller
                 'per_page' => 'nullable|integer|min:1|max:100',
             ]);
 
-            $query = Video::with(['user', 'category'])->withCount('views');
+            $query = Video::with(['user', 'category'])->withCount(['views' => function($q){
+                $q->withTrashed();
+            }]);
             if ($request->has('category_name')) {
                 $categoryName = $request->input('category_name');
                 $query->whereHas('category', function ($q) use ($categoryName) {
@@ -324,7 +331,12 @@ class VideoController extends Controller
         try{
             /** @var App\Model\User $user */
             $user = Auth::user();
-            $videos = $user->history()->with(['user', 'category'])->paginate(10);
+            $videos = $user->history()->with(['user', 'category'])
+            ->where('deleted_at',null)
+            ->withCount(['views' => function($query){
+                $query->withTrashed();
+            }])
+            ->paginate(10);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully retrieved video history',
@@ -343,7 +355,7 @@ class VideoController extends Controller
         try{
             /** @var App\Model\User $user */
             $user = Auth::user();
-            $user->history()->detach();
+            $user->views()->delete();
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully cleared video history',

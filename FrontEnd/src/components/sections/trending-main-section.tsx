@@ -24,12 +24,18 @@ export const TrendingMainSection: FC = () => {
                     const data = response.data.data.data.map((video: any) => ({
                         id: video.id,
                         title: video.title,
-                        user: video.user.name,
+                        category_name: video.category.name,
+                        description: video.description,
+                        user: { 
+                            id: video.user.id,
+                            name: video.user.name,
+                            email: video.user.email,
+                            pfp_path: video.user.pfp_path,
+                        },
                         thumbnail: video.thumbnail_path,
                         views: video.views_count,
                         uploadTime: video.created_at,
                         duration: video.duration,
-                        channelAvatar: video.user.pfp_path,
                     }));
                     setVideos(data || []);
                 } else {

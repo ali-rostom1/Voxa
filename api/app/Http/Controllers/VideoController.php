@@ -69,7 +69,11 @@ class VideoController extends Controller
     public function show(string $id)
     {
         try{
-            $video = Video::with(['user','category'])->withCount('views')->find($id);
+            $video = Video::with(['user', 'category'])
+                ->withCount(['reactions as likes_count' => function ($query) {
+                    $query->where('value', 1);
+                }, 'views'])
+                ->find($id);
             if(!$video){
                 return response()->json([
                     'status' => 'error',
@@ -84,7 +88,8 @@ class VideoController extends Controller
         }catch(\Throwable $e){
             return response()->json([
                 'status' => 'error',
-                'message' => 'An internal server error occurred while trying to find video.'
+                'message' => 'An internal server error occurred while trying to find video.',
+                'error' => $e->getMessage()
             ],500);
         }
     }

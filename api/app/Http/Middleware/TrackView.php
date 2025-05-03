@@ -30,7 +30,7 @@ class TrackView
             $video = Video::find($id);
             
             if ($video) {
-                
+
                 $this->viewTracker->track($video, $request);
             }
         }

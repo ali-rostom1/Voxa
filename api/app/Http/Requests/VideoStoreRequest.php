@@ -22,7 +22,7 @@ class VideoStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'video_upload' => 'required|file|mimetypes:video/mp4,video/quicktime|max:200400', #100 MB
+            'video_upload' => 'required|file|mimetypes:video/mp4,video/quicktime|max:2000400', #100 MB
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',

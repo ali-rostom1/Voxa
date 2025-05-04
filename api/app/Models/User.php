@@ -23,6 +23,7 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'pfp_path',
+        'pfp_version',
     ];
 
     /**
@@ -33,6 +34,7 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+        'pfp_version',
     ];
 
     /**

@@ -28,7 +28,6 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({ children, isPublic = f
     }
     if (!isAuthenticated && !isPublic && pathname !== '/login') {
       const redirect = encodeURIComponent(`${pathname}${searchParams.toString() ? `?${searchParams}` : ''}`);
-      console.log('[ProtectedRoute] Unauthenticated user, redirecting to login:', redirect);
       router.push(`/login?redirect=${redirect}`);
     }
   }, [loading, isAuthenticated, isPublic, pathname, searchParams, router]);

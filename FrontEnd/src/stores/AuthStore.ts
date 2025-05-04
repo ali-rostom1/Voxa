@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import apiClient from '@/lib/apiClient';
 import { UserProfile } from '@/types';
 
-interface AuthState {
+export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   user: UserProfile | null;
@@ -13,6 +13,7 @@ interface AuthState {
   logout: () => void;
   setToken: (token: string) => void;
   checkAuth: () => Promise<void>;
+  updateUser: (user: UserProfile) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -39,7 +40,7 @@ export const useAuthStore = create<AuthState>()(
                 email: userData.email,
                 pfp_path: userData.pfp_path || null,
               };
-    
+              
             set({
               token,
               isAuthenticated: true,
@@ -54,6 +55,9 @@ export const useAuthStore = create<AuthState>()(
           set({ token: null, isAuthenticated: false, user: null, loading: false });
         }
       },
+      updateUser: (user : UserProfile) =>{
+        set({user});
+      }
     }),
     {
       name: 'auth-storage',

@@ -60,7 +60,6 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
                     name: response.data.data.name,
                     email: response.data.data.email,
                     pfp_path: response.data.data.pfp_path,
-                    
                 };
                 console.log(updatedUser);
                 updateUser(updatedUser);

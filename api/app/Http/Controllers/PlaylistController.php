@@ -17,15 +17,14 @@ class PlaylistController extends Controller
     public function index()
     {
         try {
-            $playlists = Playlist::with(['user', 'videos'])
+            $playlists = Playlist::with(['user', 'videos'])->withCount("videos")
                 ->paginate(10);
-                
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully retrieved playlists',
                 'data' => $playlists,
             ], 200);
-        } catch (\Throwable $e) {
+        }catch (\Throwable $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'An internal server error occurred while trying to retrieve playlists.'
@@ -39,7 +38,8 @@ class PlaylistController extends Controller
     public function store(PlaylistStoreRequest $request)
     {
         try {
-            $playlist = Playlist::create($request->validated());
+            $user = Auth::user();
+            $playlist = Playlist::create([...$request->validated(),'user_id'=>$user->id]);
 
             return response()->json([
                 'status' => 'success',
@@ -49,7 +49,8 @@ class PlaylistController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'An internal server error occurred while trying to create playlist.'
+                'message' => 'An internal server error occurred while trying to create playlist.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -139,12 +140,11 @@ class PlaylistController extends Controller
      */
     public function addVideo(Request $request, string $playlistId, string $videoId)
     {
-        try {
+            try {
             $playlist = Playlist::where('user_id', Auth::id())->findOrFail($playlistId);
             $video = Video::findOrFail($videoId);
 
-            // Check if video is already in playlist
-            if ($playlist->videos()->where('id', $videoId)->exists()) {
+            if ($playlist->videos()->where('video_id', $videoId)->exists()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Video is already in the playlist.'
@@ -165,7 +165,8 @@ class PlaylistController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred trying to add video to playlist.'
+                'message' => 'An error occurred trying to add video to playlist.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -185,7 +186,7 @@ class PlaylistController extends Controller
                     'message' => 'Video is not in the playlist.'
                 ], 400);
             }
-
+            
             $playlist->videos()->detach($videoId);
 
             return response()->json([

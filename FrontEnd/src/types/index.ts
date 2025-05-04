@@ -54,3 +54,12 @@ export interface Video {
   duration: string;
   thumbnail: string;
 }
+export interface Playlist{
+  id: string;
+  name: string;
+  description: string;
+  user: UserProfile;
+  uploadTime: string;
+  video_count: number;
+  thumbnail: string;
+}

@@ -11,7 +11,7 @@ import apiClient from "@/lib/apiClient";
 export const PlaylistSection = () => {
     const [playlists,setPlaylists] = useState<Playlist[] | null>(null);
     const [page,setPage] = useState<number>(1);
-    const [perPage,setPerPage] = useState<number>(6);
+    const [perPage,setPerPage] = useState<number>(8);
     const [totalPages,setTotalPages] = useState<number>(1);
     const [isLoading,setIsLoading] = useState<boolean>(true);
     const [error,setError] = useState<string>('');
@@ -21,12 +21,12 @@ export const PlaylistSection = () => {
             try{
                 setIsLoading(true);
                 setError('');
-                const response = await apiClient('/api/v1/playlists');
+                const response = await apiClient.get(`/api/v1/playlists/all/${perPage}?page=${page}`);
                 const data= response.data.data.data.map((playlist: any) => ({
                     id: playlist.id,
                     name: playlist.name,
                     description: playlist.description,
-                    thumbnail: playlist.videos[0].thumbnail_path ?? 'images/avatar.png',
+                    thumbnail: playlist.videos.length > 0 ? playlist.videos[0].thumbnail_path : 'images/placeholder.png',
                     user: { 
                         id: playlist.user.id,
                         name: playlist.user.name,
@@ -42,6 +42,7 @@ export const PlaylistSection = () => {
 
             }catch(err: any){
                 setError("Failed to fetch Playlists");
+                console.log(err);
             }finally{
                 setIsLoading(false);
             }
@@ -59,7 +60,7 @@ export const PlaylistSection = () => {
                 }
             
             </div>
-            {/* <Pagination className="mt-5"  /> */}
+            <Pagination className="mt-5" currentPage={page} totalPages={totalPages} onPageChange={(page) => setPage(page)}  />
         </section>
     ); 
 }

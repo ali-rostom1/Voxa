@@ -73,7 +73,7 @@ export const UserMenu: FC<{ user: UserProfile | null }> = ({ user }) => {
               <p className="text-xs text-gray-500 truncate">{user.email}</p>
             </div>
             <div className="py-1">
-              <Link href="/profile">
+              <Link href={`/profile/${user.id}`}>
                 <div className="flex items-center px-4 py-2 text-sm hover:bg-gray-800">
                   <User size={16} className="mr-2" />
                   Profile

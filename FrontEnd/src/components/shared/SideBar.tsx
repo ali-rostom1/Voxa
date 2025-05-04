@@ -56,7 +56,7 @@ export const SideBar: FC = () => {
     { icon: History, label: 'History', href: '/history' },
     { icon: Bookmark, label: 'Saved', href: '/saved' },
     { icon: ThumbsUpIcon, label: 'Liked', href: '/liked' },
-    { icon: ListMusic, label: 'Playlists', href: '/playlists' },
+    { icon: ListMusic, label: 'Playlists', href: '/playlist' },
   ];
 
   const handleLogout = () => {

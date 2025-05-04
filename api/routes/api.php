@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,9 @@ Route::prefix('v1')->group(function(){
         Route::get('/videos/{video}/subscribe',[ReactionController::class, 'subscribe']);
         Route::post('/videos/history/me',[VideoController::class, 'getHistory']);
         Route::delete('/videos/history/clear',[VideoController::class, 'clearHistory']);
+
+
+        Route::put('/profile',[ProfileController::class,'update']);
     });
 });
 

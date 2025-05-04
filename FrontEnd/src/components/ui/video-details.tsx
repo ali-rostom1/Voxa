@@ -1,8 +1,9 @@
 import { Video } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { ThumbsUp, ThumbsDown, Share, Flag, MessageCircle, BookmarkPlus,Check } from "lucide-react";
+import { ThumbsUp, ThumbsDown , ListPlus , BookmarkPlus,Check } from "lucide-react";
 import { useAuthStore } from "@/stores/AuthStore";
 import { useState } from "react";
+import { ChoosePlaylistModal } from "./choose-playlist-modal";
 
 interface VideoDetailsProps {
     video: Video;
@@ -20,6 +21,7 @@ interface VideoDetailsProps {
 export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isDisliked,onDislike,isSaved,onSave,likes }: VideoDetailsProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const { user } = useAuthStore((state) => state);
+  const [isOpen,setIsOpen] = useState<boolean>(false);
   const formatViews = (views: number): string => {
     if (views >= 1000000) {
       return `${(views / 1000000).toFixed(1)}M`;
@@ -77,7 +79,7 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
         {/* Action buttons */}
         <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
           <div className="flex rounded-full bg-gray-100 p-1">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors cursor-pointer" onClick={onLike}>
+            <button onClick={onLike} className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors cursor-pointer">
               {isLiked ? (
                 <ThumbsUp className="h-5 w-5 text-blue-600"  />
               ) : (
@@ -86,7 +88,7 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
               <span className="font-medium">{formatViews(likes)}</span>
             </button>
             <div className="w-px bg-gray-300 mx-1"></div>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors cursor-pointer" onClick={onDislike}>
+            <button onClick={onDislike} className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors cursor-pointer">
               {isDisliked ? (
                 <ThumbsDown className="h-5 w-5 text-red-600"  />
               ) : (
@@ -95,7 +97,7 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
             </button>
           </div>
 
-          <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer" onClick={onSave}>
+          <button onClick={onSave} className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer">
             {isSaved ? (
                 <BookmarkPlus className="h-5 w-5 text-blue-600" />
                 ) : (
@@ -103,9 +105,12 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
                 )}
             <span className="font-medium">Save</span>
           </button>
+          <button onClick={() => setIsOpen(true)}  className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer">
+                <ListPlus/>
+          </button>
         </div>
       </div>
-
+      
       {/* Description */}
       {video.description && (
         <div className={`mt-4 rounded-xl bg-gray-100 p-6 transition-all duration-300 ${
@@ -132,7 +137,7 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
           )}
         </div>
       )}
-      
+      <ChoosePlaylistModal isOpen={isOpen} onClose={() => setIsOpen(false)} videoid={video.id} />
     </div>
   );
 }

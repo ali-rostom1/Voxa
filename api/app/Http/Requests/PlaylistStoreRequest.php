@@ -22,10 +22,8 @@ class PlaylistStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:40',
+            'name' => 'required|string|max:40|unique:playlists,name',
             'description' => 'nullable|string|max:255',
-            'image_path' => 'nullable|image',
-            'user_id' => 'required|exists:users,id',
         ];
     }
 }

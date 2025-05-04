@@ -92,7 +92,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
                     {(previewImage || currentUser?.pfp_path) ? (
                         <div className={`relative w-full h-full ${isOwnProfile ? 'cursor-pointer' : ''}`}>
                         <Image
-                            src={previewImage || currentUser!.pfp_path}
+                            src={previewImage || currentUser?.pfp_path || "images/avatar"}
                             alt={currentUser?.name || 'User avatar'}
                             fill
                             className="object-cover"

@@ -14,11 +14,11 @@ class PlaylistController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(string $perPage)
     {
         try {
             $playlists = Playlist::with(['user', 'videos'])->withCount("videos")
-                ->paginate(10);
+                ->paginate($perPage);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Successfully retrieved playlists',
@@ -186,7 +186,7 @@ class PlaylistController extends Controller
                     'message' => 'Video is not in the playlist.'
                 ], 400);
             }
-            
+
             $playlist->videos()->detach($videoId);
 
             return response()->json([
@@ -214,7 +214,7 @@ class PlaylistController extends Controller
         try {
             $playlists = Playlist::with(['videos'])
                 ->where('user_id', Auth::id())
-                ->paginate(10);
+                ->get();
 
             return response()->json([
                 'status' => 'success',

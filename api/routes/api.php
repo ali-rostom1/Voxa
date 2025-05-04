@@ -19,7 +19,8 @@ Route::prefix('v1')->group(function(){
     Route::apiResource('/videos',VideoController::class)->only(['index']);
     Route::apiResource('/videos',VideoController::class)->only(['show'])->middleware('track.view');
     Route::apiResource('categories',CategoryController::class)->only(['index','show']);
-    Route::apiResource('/playlists',PlaylistController::class)->only(["index",'show']);
+    Route::apiResource('/playlists',PlaylistController::class)->only('show');
+    Route::get('playlists/all/{perPage}',[PlaylistController::class,'index']);
 
     Route::get('videos/featured/{perPage}',[VideoController::class,'featuredVideos']);
     Route::get('videos/trending/{perPage}',[VideoController::class,'trendingVideos']);
@@ -47,6 +48,7 @@ Route::prefix('v1')->group(function(){
 
         //playlist interactions
         Route::post('/playlists/add/{playlistId}/{videoId}',[PlaylistController::class,'addVideo']);
+        Route::get('/my-playlists',[PlaylistController::class,'userPlaylists']);
 
 
         Route::put('/profile',[ProfileController::class,'update']);

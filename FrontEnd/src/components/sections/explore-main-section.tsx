@@ -89,14 +89,14 @@ export const ExploreMainSection: FC = () => {
         );
     }
     return (
-        <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto h-full">
-            <div className="flex items-center justify-between mb-6">
+        <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-6 overflow-hidden">
                 <CategoryFilter categories={categories} activeCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
                 <SortingFilter onChange={setSortValue} selected={sortValue} setSelected={setSortValue}/>
                 
             </div>
                 {isLoading ? (
-                    <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+                    <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto ">
                     <div className="flex justify-center items-center h-screen">
                         <p>Loading...</p>
                     </div>

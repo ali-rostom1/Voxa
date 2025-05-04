@@ -15,7 +15,6 @@ export const PlaylistCard: FC<PlaylistCardProps> = ({ playlist, size = 'default'
   const formatVideoCount = (count: number): string => {
     return `${count} video${count != 1 ? 's' : ''}`;
   };
-  console.log(playlist);
 
   return (
     <div className="group w-full transition-all duration-500 hover:-translate-y-1 rounded-xl border border-gray-200 hover:border-gray-300 p-3 hover:shadow-md bg-white">

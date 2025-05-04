@@ -18,8 +18,23 @@ class ProfileController extends Controller
             $validated = $request->validated();
             if(key_exists('pfp_file',$validated)){
                 $cdn_url = config('app.cdn_url');
-                $res = Storage::disk('s3')->put("uploads/images/{$user->id}",file_get_contents($validated['pfp_file']));
-                if($res) $validated = [...$validated,'pfp_path'=> "{$cdn_url}/uploads/images/{$user->id}"];
+                $extension = $validated['pfp_file']->getClientOriginalExtension();
+                
+                $currentVersion = $user->pfp_version ? (int)$user->pfp_version : 0;
+                $newVersion = $currentVersion + 1;
+                $fileName = "uploads/images/{$user->id}-v{$newVersion}.{$extension}";
+
+                $res = Storage::disk('s3')->put($fileName, file_get_contents($validated['pfp_file']), 'public');
+                if($res){
+                    if ($user->pfp_path) {
+                        $oldFileName = basename($user->pfp_path);
+                        Storage::disk('s3')->delete("uploads/images/{$oldFileName}");
+                    }
+                    $validated['pfp_path'] = "{$cdn_url}/{$fileName}";
+                    $validated['pfp_version'] = $newVersion;
+                }else{
+                    throw new Exception('Failed to upload profile picture to S3');
+                }
             }
             if(isset($validated['new_password'])) $validated = [...$validated,'password' => Hash::make($validated['new_password'])];
             $user->update($validated);

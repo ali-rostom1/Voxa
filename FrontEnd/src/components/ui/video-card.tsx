@@ -3,6 +3,7 @@ import { Video } from "@/types";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { User } from "lucide-react";
 
 
 interface VideoCardProps {
@@ -56,31 +57,35 @@ export const VideoCard: FC<VideoCardProps> = ({ video, size = 'default' }) => {
         </div>
       </div>
       
-      {/* Content Section - Carefully aligned grid */}
+      {/* Content Section  */}
       <div className="mt-3 flex items-start">
-        {/* Channel Avatar - Perfectly aligned */}
-        {video.user.pfp_path && (
+        {/* Channel Avatar  */}
+        {video.user.pfp_path ? (
           <div className="flex-shrink-0 mr-3 mt-0.5">
             <div 
-              className={`${isLarge ? 'w-9 h-9' : 'w-8 h-8'} rounded-full bg-cover bg-center border border-gray-100 shadow-sm`} 
+              className={`${isLarge ? 'w-9 h-9' : 'w-8 h-8'} rounded-full bg-cover bg-center border border-gray-300 shadow-sm`} 
               style={{ backgroundImage: `url(${video.user.pfp_path})` }}
             />
           </div>
+        ): (
+          <div className="flex-shrink-0 mr-3 mt-0.5">
+            <User className={`${isLarge ? 'w-9 h-9' : 'w-8 h-8'} text-blue-500 rounded-full bg-cover bg-center border border-gray-300 shadow-sm p-1`} />
+            </div>
         )}
         
-        {/* Text Content - Perfect alignment */}
+        {/* Text Content  */}
         <div className="flex-1 min-w-0">
-          {/* Title - Precisely positioned */}
+          {/* Title - */}
           <h3 className={`font-semibold ${isLarge ? 'text-base' : 'text-sm'} leading-tight mb-1.5 line-clamp-2 text-gray-800 group-hover:text-gray-900`}>
             {video.title}
           </h3>
           
-          {/* Channel Name - Exact spacing */}
+          {/* Channel Name  */}
           <p className="text-gray-600 text-xs mb-1">
             {video.user.name}
           </p>
           
-          {/* Stats - Precisely aligned */}
+          {/* Stats  */}
           <div className="text-gray-500 text-xs flex items-center">
             <span>{formatViews(video.views)} views</span>
             <span className="mx-1.5 inline-block w-0.5 h-0.5 bg-gray-400 rounded-full"></span>

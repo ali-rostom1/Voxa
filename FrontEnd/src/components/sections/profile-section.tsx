@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
-import {  Bell, UserPlus, Mail, Video, List, User, PenLine  } from 'lucide-react';
+import {  Bell, UserPlus, Mail, Video, List, User, PenLine , ListPlus } from 'lucide-react';
 import { UserProfile } from '@/types';
 import { useAuthStore } from '@/stores/AuthStore';
 import Image from 'next/image';
@@ -7,6 +7,7 @@ import { EditProfileModal } from '../ui/profileEdit-modal';
 import { Check,X } from 'lucide-react';
 import apiClient from '@/lib/apiClient';
 import Swal from 'sweetalert2';
+import { CreatePlalistModal } from '../ui/create-playlist-modal';
 
 
 interface ProfileSectionProps{
@@ -21,6 +22,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
     const [isFriend, setIsFriend] = useState<boolean>(false);
     const [selectedFilter,setSelectedFilter] = useState<string>('videos');
     const [isModalOpen,setIsModalOpen] = useState<boolean>(false);
+    const [isModal2Open,setIsModal2Open] = useState<boolean>(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     useEffect(()=>{
@@ -84,7 +86,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
     return (
         <div className="flex flex-col w-full bg-gray-100 min-h-screen">
         {/* Profile Header */}
-        <div className="bg-blue-600 p-6 rounded-b-lg">
+        <div className="bg-blue-600 p-6 rounded-lg">
             <div className="flex flex-col md:flex-row items-start justify-between">
             {/* Profile Info */}
             <div className="flex items-center gap-4">
@@ -161,6 +163,14 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
                     )
                 }
                 { isOwnProfile && (
+                    <>
+                        <button 
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full bg-white text-blue-600`}
+                            onClick={() => setIsModal2Open(true)}
+                            >
+                            <ListPlus  size={16} />
+                            <span>Create Playlist</span>
+                        </button>
                         <button 
                         className={`flex items-center gap-2 px-4 py-2 rounded-full bg-white text-blue-600`}
                         onClick={() => setIsModalOpen(true)}
@@ -168,9 +178,10 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
                         <PenLine  size={16} />
                         <span>edit profile</span>
                         </button>
+                    </>
                     )
-
                 }
+                <CreatePlalistModal isOpen={isModal2Open} onClose={() => setIsModal2Open(false)}/>
             </div>
             </div>
             

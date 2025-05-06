@@ -84,7 +84,7 @@ export const MainSection: FC= () => {
     
   
     const handleGetStarted = () => {
-      router.push('/upload');
+      router.push('/explore');
     };
   
     return (

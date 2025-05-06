@@ -166,38 +166,7 @@ export default function Login() {
               </button>
             </form>
             
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-sm text-gray-500">or continue with</span>
-              </div>
-            </div>
             
-            <div className="flex justify-center gap-4 mb-6">
-              <button 
-                type="button" 
-                className="p-3 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors shadow-sm"
-                onClick={() => {/* Add social login logic */}}
-              >
-                <GoogleIcon />
-              </button>
-              <button 
-                type="button" 
-                className="p-3 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors shadow-sm"
-                onClick={() => {/* Add social login logic */}}
-              >
-                <FacebookIcon />
-              </button>
-              <button 
-                type="button" 
-                className="p-3 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors shadow-sm"
-                onClick={() => {/* Add social login logic */}}
-              >
-                <LinkedInIcon/>
-              </button>
-            </div>
             
             <p className="text-center text-gray-600">
               Don't have an account? <Link href="/sign-up" className="text-blue-600 font-medium hover:underline">Sign up for free</Link>

@@ -1,13 +1,14 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
-import {  Bell, UserPlus, Mail, Video, List, User, PenLine , ListPlus } from 'lucide-react';
-import { UserProfile } from '@/types';
+import {  Bell, UserPlus, Mail, User, PenLine , ListPlus } from 'lucide-react';
+import { UserProfile, Video } from '@/types';
 import { useAuthStore } from '@/stores/AuthStore';
 import Image from 'next/image';
 import { EditProfileModal } from '../ui/profileEdit-modal';
 import { Check,X } from 'lucide-react';
 import apiClient from '@/lib/apiClient';
 import Swal from 'sweetalert2';
-import { CreatePlalistModal } from '../ui/create-playlist-modal';
+import { VideoCard } from '../ui/video-card';
+import Pagination from '../ui/pagination';
 
 
 interface ProfileSectionProps{
@@ -19,12 +20,15 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
     const {user,updateUser} = useAuthStore();
     const [currentUser,setCurrentUser] = useState<UserProfile|null>(null);
     const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
-    const [isFriend, setIsFriend] = useState<boolean>(false);
     const [isModalOpen,setIsModalOpen] = useState<boolean>(false);
-    const [isModal2Open,setIsModal2Open] = useState<boolean>(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
+    const [error, setError] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [page, setPage] = useState<number>(1);
+    const [totalPages, setTotalPages] = useState<number>(1);
+    const [perPage, setPerPage] = useState<number>(3);
+    const [videos,setVideos] = useState<Video[]>([]);
 
     const fetchUser = async () => {
         const response = await apiClient.get(`/api/v1/profile/${id}`);
@@ -33,7 +37,11 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
             id:data.id,
             name:data.name,
         }
-        setCurrentUser(data || null);
+        const response2 = await apiClient.get(`/api/v1/users/${id}/isSubscribed`);
+        const data2  = response2.data.data;
+        console.log(data2);
+        setIsSubscribed(data2);
+        setCurrentUser(fetchedUser || null);
     }
 
     useEffect(()=>{
@@ -43,14 +51,25 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
         }else{
             fetchUser();
         }
+        
     },[user]);
-    const handleSubscribe = () => {
-        setIsSubscribed(!isSubscribed);
+    useEffect(()=>{
+        fetchVideos();
+    },[id,page]);
+
+    const handleSubscribe = async() => {
+        try{
+            await apiClient.get(`/api/v1/users/${id}/subscribe`);
+            setIsSubscribed(!isSubscribed);
+        }catch(err: any){
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: err?.response?.data?.message,
+            });
+         }
     };
 
-    const handleAddFriend = () => {
-        setIsFriend(!isFriend);
-    };
     
     const handleImageChange = (e:React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -92,6 +111,43 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
     }
     const handleCancelImage = () => {
         setPreviewImage(null);
+    };
+    const fetchVideos = async () => {
+        try {
+            setIsLoading(true);
+            setError("");
+            const response = await apiClient.post(`/api/v1/videos/user/${id}?page=${page}`,{
+                perPage: perPage
+            });
+            if (response.status === 200) {
+                const data = response.data.data.data.map((video: any) => ({
+                    id: video.id,
+                    title: video.title,
+                    category_name: video.category.name,
+                    description: video.description,
+                    user: { 
+                        id: video.user.id,
+                        name: video.user.name,
+                        email: video.user.email,
+                        pfp_path: video.user.pfp_path,
+                    },
+                    thumbnail: video.thumbnail_path,
+                    views: video.views_count,
+                    uploadTime: video.created_at,
+                    duration: video.duration,
+                }));
+                setVideos(data || []);
+                setTotalPages(Math.ceil(response.data.data.total/perPage));
+                setPage(response.data.data.current_page);
+                setVideos(data || []);
+            } else {
+                setError("Failed to fetch videos");
+            }
+        } catch (err: any) {
+            setError("Failed to fetch videos");
+        } finally {
+            setIsLoading(false);
+        }
     };
   
     return (
@@ -158,30 +214,11 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
                     <Bell size={16} />
                     <span>{isSubscribed ? 'Subscribed' : 'Subscribe'}</span>
                     </button>
-                    
-                    <button 
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full ${isFriend ? 'bg-blue-700 text-white' : 'bg-white text-blue-600'}`}
-                    onClick={handleAddFriend}
-                    >
-                    <UserPlus size={16} />
-                    <span>{isFriend ? 'Friend Added' : 'Add Friend'}</span>
-                    </button>
-                    
-                    <button className="bg-white text-blue-600 p-2 rounded-full">
-                    <Mail size={18} />
-                    </button>
                     </>
                     )
                 }
                 { isOwnProfile && (
                     <>
-                        <button 
-                            className={`flex items-center gap-2 px-4 py-2 rounded-full bg-white text-blue-600`}
-                            onClick={() => setIsModal2Open(true)}
-                            >
-                            <ListPlus  size={16} />
-                            <span>Create Playlist</span>
-                        </button>
                         <button 
                         className={`flex items-center gap-2 px-4 py-2 rounded-full bg-white text-blue-600`}
                         onClick={() => setIsModalOpen(true)}
@@ -192,36 +229,42 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
                     </>
                     )
                 }
-                <CreatePlalistModal isOpen={isModal2Open} onClose={() => setIsModal2Open(false)}/>
             </div>
             </div>
             
         </div>
-        
-            {/* Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-                {/* Video Cards */}
-                {[
-                { duration: '14:25', title: 'Video Title 1', views: '12K', date: '2 days ago' },
-                { duration: '8:17', title: 'Video Title 2', views: '5.3K', date: '1 week ago' },
-                { duration: '22:43', title: 'Video Title 3', views: '32K', date: '3 days ago' },
-                { duration: '7:12', title: 'Video Title 4', views: '8.7K', date: '5 days ago' },
-                { duration: '18:33', title: 'Video Title 5', views: '21K', date: '1 day ago' },
-                { duration: '3:45', title: 'Video Title 6', views: '42K', date: 'Just now' },
-                ].map((video, index) => (
-                <div key={index} className="bg-white rounded-lg overflow-hidden shadow">
-                    <div className="relative bg-gray-200 h-48">
-                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                        {video.duration}
+            {
+                isLoading ? (
+                    <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+                        <div className="flex justify-center items-center h-screen">
+                            <p>Loading...</p>
+                        </div>
+                    </section>
+                ) : error ? (
+                    <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+                        <div className="flex justify-center items-center h-screen">
+                            <p className="text-red-500">{error}</p>
+                        </div>
+                    </section>
+                ) : videos.length === 0 ? (
+                    <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+                        <div className="flex items-center justify-between mb-6">
+                        </div>
+                        <div className="flex justify-center items-center h-[70vh]">
+                            <p>No videos found</p>
+                        </div>
+                    </section>
+                ) : (
+                    <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+                        {videos.map((video) => (
+                            <VideoCard key={video.id} video={video} size='large' />
+                        ))}
                     </div>
-                    </div>
-                    <div className="p-3">
-                    <h3 className="font-medium">{video.title}</h3>
-                    <p className="text-gray-500 text-sm">{video.views} views • {video.date}</p>
-                    </div>
-                </div>
-                ))}
-            </div>
+                    <Pagination currentPage={page} totalPages={totalPages} onPageChange={(page) => setPage(page)}/>
+                    </>
+                )
+            }
         </div>
     );
 }

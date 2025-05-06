@@ -82,7 +82,7 @@ export const SideBar: FC = () => {
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            {!collapsed && <h1 className="text-xl font-bold text-blue-600">Voxa</h1>}
+            {!collapsed && <Link href='/'><h1 className="text-xl font-bold text-blue-600">Voxa</h1></Link>}
             <button
               onClick={toggleSidebar}
               className="p-1 rounded-full hover:bg-gray-700"

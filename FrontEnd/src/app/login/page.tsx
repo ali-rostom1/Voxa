@@ -74,7 +74,7 @@ export default function Login() {
       <div className="flex flex-col md:flex-row w-full">
         <div className="bg-gradient-to-b from-[#2c4258] to-[#1e2f3d] text-white w-full md:w-2/5 flex flex-col p-8 lg:p-12">
           <div className="max-w-md mx-auto md:my-36">
-            <h1 className="text-4xl font-bold mb-4">Voxa</h1>
+            <Link href='/'><h1 className="text-4xl font-bold mb-4">Voxa</h1></Link>
             <p className="text-xl mb-8 text-white/90">Share videos, connect with friends, and chat in real-time.</p>
             
             <div className="grid grid-cols-2 gap-6">

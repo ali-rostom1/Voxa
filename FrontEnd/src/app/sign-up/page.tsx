@@ -69,8 +69,8 @@ export default function Signup() {
       <div className="flex flex-col md:flex-row w-full h-screen">
         <div className="bg-gradient-to-b from-[#2c4258] to-[#1e2f3d] text-white w-full md:w-3/5 flex flex-col p-6 lg:p-8">
           <div className="max-w-md mx-auto my-auto">
-            <h1 className="text-3xl font-bold mb-3">Voxa</h1>
-            <p className="text-lg mb-6 text-white/90">Join our community of creators and viewers.</p>
+          <Link href='/'><h1 className="text-4xl font-bold mb-4">Voxa</h1></Link>
+          <p className="text-lg mb-6 text-white/90">Join our community of creators and viewers.</p>
 
             <div className="grid grid-cols-2 gap-4">
               {[

@@ -1,4 +1,5 @@
 import { Category } from '@/types';
+import Link from 'next/link';
 import { FC } from 'react';
 
 
@@ -8,6 +9,7 @@ interface CategoryCardProps {
 
 export const CategoryCard: FC<CategoryCardProps> = ({ category }) => {
   return (
+    <Link href='/explore'>
     <div 
       className="flex flex-col items-center justify-center p-4 rounded-lg cursor-pointer transition-transform hover:scale-105"
       style={{ backgroundColor: category.color }}
@@ -16,5 +18,6 @@ export const CategoryCard: FC<CategoryCardProps> = ({ category }) => {
       
       <span className="text-white text-sm font-medium">{category.title}</span>
     </div>
+    </Link>
   );
 };

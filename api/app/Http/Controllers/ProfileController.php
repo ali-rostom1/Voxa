@@ -75,4 +75,42 @@ class ProfileController extends Controller
             ], 500);
         }
     }
+    public function isSubscribed($userId){
+        try{
+            $user = User::find($userId);
+            $isSubscribed = $user->subscribers()
+            ->where('subscriber_id', Auth::id())
+            ->exists();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Successfully retrived isSubscribed',
+                'data' => $isSubscribed,
+            ],200);
+        }catch(\Throwable $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve subscription info.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function subscribe($userId){
+        try{
+            /** @var App\Model\User $user */
+            $user = Auth::user();
+            if($user->subscriptions()->where('subscribed_to_id', $userId)->exists()){
+                $user->subscriptions()->detach($userId);
+                return response()->json(['message' => 'Unsubscribed successfully'], 200);
+            }else {
+                $user->subscriptions()->attach($userId, ['created_at' => now(), 'updated_at' => now()]);
+                return response()->json(['message' => 'Subscribed successfully'], 200);
+            }
+        }catch(\Throwable $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to subscribe to user.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

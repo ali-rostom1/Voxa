@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +49,28 @@ class ProfileController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An internal server error occurred while trying to update profile.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function getUser($userId){
+        try{
+            $user = User::findOrFail($userId);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Successfully update your profile',
+                'data' => $user,
+            ]);
+
+        }catch(\Illuminate\Database\Eloquent\ModelNotFoundException $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Comment not found or you do not have permission to delete it.'
+            ],404);
+        }catch(\Throwable $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve profile.',
                 'error' => $e->getMessage(),
             ], 500);
         }

@@ -32,10 +32,6 @@ class Video extends Model
     {
         return $this->belongsTo(Category::class);
     }
-    public function playlists()
-    {
-        return $this->belongsToMany(Playlist::class,'video_playlist');
-    }
     public function comments()
     {
         return $this->hasMany(Comment::class);

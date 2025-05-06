@@ -20,17 +20,28 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
     const [currentUser,setCurrentUser] = useState<UserProfile|null>(null);
     const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
     const [isFriend, setIsFriend] = useState<boolean>(false);
-    const [selectedFilter,setSelectedFilter] = useState<string>('videos');
     const [isModalOpen,setIsModalOpen] = useState<boolean>(false);
     const [isModal2Open,setIsModal2Open] = useState<boolean>(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+
+    const fetchUser = async () => {
+        const response = await apiClient.get(`/api/v1/profile/${id}`);
+        const data = response.data.data;
+        let fetchedUser: UserProfile = {
+            id:data.id,
+            name:data.name,
+        }
+        setCurrentUser(data || null);
+    }
+
     useEffect(()=>{
         if(user && user.id == id){
             setIsOwnProfile(true);
             setCurrentUser(user);
         }else{
-            
+            fetchUser();
         }
     },[user]);
     const handleSubscribe = () => {
@@ -185,17 +196,6 @@ export const ProfileSection: FC<ProfileSectionProps> = ({id}) => {
             </div>
             </div>
             
-            {/* Navigation Tabs */}
-            <div className="flex gap-4 mt-6 overflow-x-auto">
-            <button className={`${selectedFilter === 'videos' ? 'bg-white text-blue-600 rounded-full' : 'text-white'} px-6 py-2 font-medium flex items-center gap-2`}>
-                <Video size={16} />
-                <span>Videos</span>
-            </button>
-            <button className={`${selectedFilter === 'playlists' ? 'bg-white text-blue-600 rounded-full' : 'text-white'} px-6 py-2 font-medium flex items-center gap-2`}>
-                <List size={16} />
-                <span>Playlist</span>
-            </button>
-            </div>
         </div>
         
             {/* Content Grid */}

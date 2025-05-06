@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CommentStoreRequest;
 use App\Http\Requests\CommentUpdateRequest;
+use App\Http\Requests\ReplyStoreRequest;
 use App\Models\Comment;
+use App\Models\Reaction;
+use App\Models\Reply;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,14 +17,17 @@ class CommentController extends Controller
     public function index($videoId)
     {
         try {
-            // Verify the video exists
             Video::findOrFail($videoId);
 
-            // Get paginated comments with user data
-            $comments = Comment::with('user')
+            $comments = Comment::with(['user','replies','userReaction'])
                 ->where('video_id', $videoId)
+                ->withCount(['reactions as likes_count' => function($query){
+                    $query->where('value',1);
+                },'reactions as dislikes_count' => function($query){
+                    $query->where('value',0);
+                }])
                 ->orderBy('created_at', 'desc')
-                ->paginate(15);
+                ->paginate(2);
 
             return response()->json([
                 'status' => 'success',
@@ -40,10 +46,12 @@ class CommentController extends Controller
             ], 500);
         }
     }
-    public function store(CommentStoreRequest $request, $videoId)
+    public function store(CommentStoreRequest $request)
     {
         try {
-            // Verify the video exists
+            $validated = $request->validated();
+
+            $videoId = $validated['videoId'];
             Video::findOrFail($videoId);
 
             // Create the comment
@@ -69,7 +77,8 @@ class CommentController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred while adding the comment.'
+                'message' => 'An error occurred while adding the comment.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -167,16 +176,67 @@ class CommentController extends Controller
         try {
             $comment = Comment::findOrFail($commentId);
             $user = Auth::user();
-
-            // Refresh the comment to get updated like count
-            $comment->refresh();
-
+            
+            $existingReaction = $comment->reactions()
+            ->where('user_id',$user->id)
+            ->first();
+            if($existingReaction){
+                if($existingReaction->value === 1){
+                    $existingReaction->delete();
+                    return response()->json([
+                        'message' => 'Reaction removed'
+                    ],200);
+                }
+                $existingReaction->update(['value' => 1]);
+                return response()->json(['message' => 'Reaction updated'], 200);
+            }
+            $reaction = new Reaction([
+                'user_id' => $user->id,
+                'value' => 1
+            ]);
+            $comment->reactions()->save($reaction);
             return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'likes_count' => $comment->likes_count
-                ]
-            ], 200);
+                'message' => 'Reaction added'
+            ],200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Comment not found.'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while processing your request.'
+            ], 500);
+        }
+    }
+    public function dislike($commentId)
+    {
+        try {
+            $comment = Comment::findOrFail($commentId);
+            $user = Auth::user();
+            
+            $existingReaction = $comment->reactions()
+            ->where('user_id',$user->id)
+            ->first();
+            if($existingReaction){
+                if($existingReaction->value === 0){
+                    $existingReaction->delete();
+                    return response()->json([
+                        'message' => 'Reaction removed'
+                    ],200);
+                }
+                $existingReaction->update(['value' => 0]);
+                return response()->json(['message' => 'Reaction updated'], 200);
+            }
+            $reaction = new Reaction([
+                'user_id' => $user->id,
+                'value' => 0
+            ]);
+            $comment->reactions()->save($reaction);
+            return response()->json([
+                'message' => 'Reaction added'
+            ],200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
@@ -201,14 +261,17 @@ class CommentController extends Controller
     public function replies($commentId)
     {
         try {
-            // Verify parent comment exists
             Comment::findOrFail($commentId);
 
-            // Get paginated replies with user data
-            $replies = Comment::with('user')
-                ->where('parent_id', $commentId)
-                ->orderBy('created_at', 'asc') // Oldest first for replies
-                ->paginate(10);
+            $replies = Reply::with(['user','userReaction'])
+                ->where('comment_id', $commentId)
+                ->withCount(['reactions as likes_count' => function($query){
+                    $query->where('value',1);
+                },'reactions as dislikes_count' => function($query){
+                    $query->where('value',0);
+                }])
+                ->orderBy('created_at', 'asc')
+                ->paginate(2);
 
             return response()->json([
                 'status' => 'success',
@@ -223,7 +286,168 @@ class CommentController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred while retrieving comment replies.'
+                'message' => 'An error occurred while retrieving comment replies.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function addReply(ReplyStoreRequest $request,string $commentId){
+        try {
+            Comment::findOrFail($commentId);
+            $validated = $request->validated();
+            $reply = Reply::create([...$validated,'comment_id' => $commentId,'user_id'=>Auth::id()]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Reply added successfully',
+                'data' => $reply,
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Comment not found.'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while posting reply.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function show($commentId){
+        try {
+            $comment = Comment::with(['user','replies','userReaction'])
+            ->withCount(['reactions as likes_count' => function($query){
+                $query->where('value',1);
+            },'reactions as dislikes_count' => function($query){
+                $query->where('value',0);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->find($commentId);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Comment retrived successfully',
+                'data' => $comment,
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Comment not found.'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while retrieving comment.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function likeReply($replyId)
+    {
+        try {
+            $reply = Reply::findOrFail($replyId);
+            $user = Auth::user();
+            
+            $existingReaction = $reply->reactions()
+            ->where('user_id',$user->id)
+            ->first();
+            if($existingReaction){
+                if($existingReaction->value === 1){
+                    $existingReaction->delete();
+                    return response()->json([
+                        'message' => 'Reaction removed'
+                    ],200);
+                }
+                $existingReaction->update(['value' => 1]);
+                return response()->json(['message' => 'Reaction updated'], 200);
+            }
+            $reaction = new Reaction([
+                'user_id' => $user->id,
+                'value' => 1
+            ]);
+            $reply->reactions()->save($reaction);
+            return response()->json([
+                'message' => 'Reaction added'
+            ],200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'reply not found.'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while processing your request.'
+            ], 500);
+        }
+    }
+    public function dislikeReply($replyId)
+    {
+        try {
+            $reply = Reply::findOrFail($replyId);
+            $user = Auth::user();
+            
+            $existingReaction = $reply->reactions()
+            ->where('user_id',$user->id)
+            ->first();
+            if($existingReaction){
+                if($existingReaction->value === 0){
+                    $existingReaction->delete();
+                    return response()->json([
+                        'message' => 'Reaction removed'
+                    ],200);
+                }
+                $existingReaction->update(['value' => 0]);
+                return response()->json(['message' => 'Reaction updated'], 200);
+            }
+            $reaction = new Reaction([
+                'user_id' => $user->id,
+                'value' => 0
+            ]);
+            $reply->reactions()->save($reaction);
+            return response()->json([
+                'message' => 'Reaction added'
+            ],200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'reply not found.'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while processing your request.'
+            ], 500);
+        }
+    }
+    public function showReply($replyId){
+        try {
+            $reply = Reply::with(['user','userReaction'])
+            ->withCount(['reactions as likes_count' => function($query){
+                $query->where('value',1);
+            },'reactions as dislikes_count' => function($query){
+                $query->where('value',0);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->find($replyId);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'reply retrived successfully',
+                'data' => $reply,
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'reply not found.'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while retrieving reply.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

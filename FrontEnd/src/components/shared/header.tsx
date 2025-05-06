@@ -2,7 +2,6 @@
 
 import { FC, useEffect, useState } from 'react';
 import { Search, Bell, Mail, Menu } from 'lucide-react';
-import { NotificationBadge } from '@/components/ui/NotificationBadge';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { UploadButton } from '@/components/ui/UploadButton';
 import { UserMenu } from '@/components/ui/UserMenu';
@@ -86,15 +85,6 @@ export const VoxaHeader: FC<VoxaHeaderProps> = ({
             <Search size={20} className="text-gray-600 dark:text-gray-300" />
           </button>
 
-          <NotificationBadge
-            count={notifications}
-            icon={<Bell size={20} className="text-gray-600 dark:text-gray-300" />}
-          />
-
-          <NotificationBadge
-            count={messages}
-            icon={<Mail size={20} className="text-gray-600 dark:text-gray-300" />}
-          />
 
           <UploadButton isMobile={isMobile} handleClick={handleUploadButton} />
 

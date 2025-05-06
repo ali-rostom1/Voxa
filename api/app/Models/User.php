@@ -69,22 +69,13 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Video::class);
     }
-    public function playlists()
-    {
-        return $this->hasMany(Playlist::class);
-    }
     public function replies()
     {
         return $this->hasMany(Reply::class);
     }
-    public function conversations()
-    {
-        return $this->belongsToMany(Conversation::class,'conversation_participants');
-    }
-    public function messages()
-    {
-        return $this->hasMany(Message::class);
-    }
+    
+   
+    
     public function reactions()
     {
         return $this->hasMany(Reaction::class);
@@ -93,40 +84,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Video::class,'saved_videos');
     }
-    public function friends()
-    {
-        return $this->belongsToMany(User::class,'friends','user_id','friend_id')
-                    ->withPivot('is_accepted')
-                    ->wherePivot('is_accepted',true)
-                    ->withTimestamps()
-                    ->union(
-                        $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id')
-                             ->withPivot('is_accepted')
-                             ->wherePivot('is_accepted', true)
-                             ->withTimestamps()
-                    );
-    }
-    public function sentFriendRequests()
-    {
-        return $this->belongsToMany(User::class,'friends','user_id','friend_id')
-                    ->withPivot('is_accepted')
-                    ->wherePivot('is_accepted',false)
-                    ->withTimestamps();
-    }
-    public function receivedFriendRequests()
-    {
-        return $this->belongsToMany(User::class,'friends','friend_id','user_id')
-                    ->withPivot('is_accepted')
-                    ->wherePivot('is_accepted',false)
-                    ->withTimestamps();
-    }
+    
     public function subscribers()
     {
-        return $this->belongsToMany(User::class,'subscribes','subscriber_id','subscribed_to_id');
+        return $this->belongsToMany(User::class,'subscribes','subscribed_to_id','subscriber_id');
     }
     public function subscriptions()
     {
-        return $this->belongsToMany(User::class,'subscribes','subscribed_to_id','subscriber_id');
+        return $this->belongsToMany(User::class,'subscribes','subscriber_id','subscribed_to_id');
     }
     public function history()
     {

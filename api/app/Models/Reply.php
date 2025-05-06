@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Reply extends Model
 {
@@ -23,5 +24,10 @@ class Reply extends Model
     public function reactions()
     {
         return $this->morphMany(Reaction::class,'reactable');
+    }
+    public function userReaction()
+    {
+        return $this->morphOne(Reaction::class, 'reactable')
+                    ->where('user_id', Auth::id());
     }
 }

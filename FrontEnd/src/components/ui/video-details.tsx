@@ -3,7 +3,6 @@ import { formatDistanceToNow } from "date-fns";
 import { ThumbsUp, ThumbsDown , ListPlus , BookmarkPlus,Check } from "lucide-react";
 import { useAuthStore } from "@/stores/AuthStore";
 import { useState } from "react";
-import { ChoosePlaylistModal } from "./choose-playlist-modal";
 
 interface VideoDetailsProps {
     video: Video;
@@ -21,7 +20,6 @@ interface VideoDetailsProps {
 export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isDisliked,onDislike,isSaved,onSave,likes }: VideoDetailsProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const { user } = useAuthStore((state) => state);
-  const [isOpen,setIsOpen] = useState<boolean>(false);
   const formatViews = (views: number): string => {
     if (views >= 1000000) {
       return `${(views / 1000000).toFixed(1)}M`;
@@ -38,7 +36,6 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
         {video.title}
       </h1>
 
-      {/* Meta information and actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200">
         {/* Channel info */}
         <div className="flex items-center gap-4">
@@ -105,9 +102,7 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
                 )}
             <span className="font-medium">Save</span>
           </button>
-          <button onClick={() => setIsOpen(true)}  className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer">
-                <ListPlus/>
-          </button>
+          
         </div>
       </div>
       
@@ -137,7 +132,6 @@ export function VideoDetails({ video,isSubscribed,onSubscribe,isLiked,onLike,isD
           )}
         </div>
       )}
-      <ChoosePlaylistModal isOpen={isOpen} onClose={() => setIsOpen(false)} videoid={video.id} />
     </div>
   );
 }

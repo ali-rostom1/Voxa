@@ -3,7 +3,6 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\VideoController;
@@ -19,21 +18,24 @@ Route::prefix('v1')->group(function(){
     Route::apiResource('/videos',VideoController::class)->only(['index']);
     Route::apiResource('/videos',VideoController::class)->only(['show'])->middleware('track.view');
     Route::apiResource('categories',CategoryController::class)->only(['index','show']);
-    Route::apiResource('/playlists',PlaylistController::class)->only('show');
-    Route::get('playlists/all/{perPage}',[PlaylistController::class,'index']);
+    Route::apiResource('/comments',CommentController::class)->only(['index','show']);
+
 
     Route::get('videos/featured/{perPage}',[VideoController::class,'featuredVideos']);
     Route::get('videos/trending/{perPage}',[VideoController::class,'trendingVideos']);
     Route::post('videos/filter',[VideoController::class,'getVideosFiltered']);
     
+    Route::get('videos/{videoId}/comments',[CommentController::class,'index']);
+    Route::get('comments/{commentId}/replies',[CommentController::class,'replies']);
+    Route::get('replies/{replyId}',[CommentController::class,'showReply']);
        
     Route::middleware('auth:api')->group(function(){
         Route::post('/logout',[AuthController::class,'logout']);
         Route::get('/me',[AuthController::class,'me']);
         Route::apiResource('/videos',VideoController::class)->except(['index','show']);
-        Route::apiResource('/comments',CommentController::class);
+        Route::apiResource('/comments',CommentController::class)->except(['index','show']);
         Route::apiResource('/categories',CategoryController::class)->except(['index','show']);
-        Route::apiResource('/playlists',PlaylistController::class)->except(['index','show']);
+
 
         // Video reactions
         Route::post('/videos/{video}/like', [ReactionController::class, 'like']);
@@ -46,12 +48,23 @@ Route::prefix('v1')->group(function(){
         Route::delete('/videos/history/clear',[VideoController::class, 'clearHistory']);
 
 
-        //playlist interactions
-        Route::post('/playlists/add/{playlistId}/{videoId}',[PlaylistController::class,'addVideo']);
-        Route::get('/my-playlists',[PlaylistController::class,'userPlaylists']);
 
 
         Route::put('/profile',[ProfileController::class,'update']);
+        Route::get('/profile/{userId}',[ProfileController::class,'getUser']);
+
+
+        Route::post('comments/{commentId}/replies',[CommentController::class,'addReply']);
+
+
+        Route::post('replies/{replyId}/like',[CommentController::class,'likeReply']);
+        Route::post('comments/{commentId}/like',[CommentController::class,'like']);
+
+
+
+        Route::post('replies/{replyId}/dislike',[CommentController::class,'dislikeReply']);
+        Route::post('comments/{commentId}/dislike',[CommentController::class,'dislike']);
+
     });
 });
 

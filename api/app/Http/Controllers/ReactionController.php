@@ -26,6 +26,7 @@ class ReactionController extends Controller
         $isSubscribed = $video->user->subscribers()
             ->where('subscriber_id', $user->id)
             ->exists();
+            
         $isSaved = $user->savedVideos()
             ->where('video_id', $video->id)
             ->exists();
@@ -61,7 +62,7 @@ class ReactionController extends Controller
         $reaction = new Reaction([
             'user_id' => $user->id,
             'value' => $value
-        ]);
+        ]); 
         
         $video->reactions()->save($reaction);
         
@@ -99,7 +100,7 @@ class ReactionController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $channel = $video->user;
-        if ($user->subscriptions()->where('subscriber_id', $channel->id)->exists()) {
+        if ($user->subscriptions()->where('subscribed_to_id', $channel->id)->exists()) {
             $user->subscriptions()->detach($channel->id);
             return response()->json(['message' => 'Unsubscribed successfully'], 200);
         } else {

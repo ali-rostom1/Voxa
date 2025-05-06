@@ -20,9 +20,13 @@ class VideoController extends Controller
     {
         try{
             $videos = Video::with(['user','category'])
-            ->withCount(['views' => function($query){
-                $query->withThrashed();
-            }])
+            ->withCount([
+                'views' => function($query) {
+                    $query->where(function($subQuery) {
+                        $subQuery->withTrashed();
+                    });
+                }
+            ])
             ->inRandomOrder()
             ->paginate(10);
         
@@ -77,7 +81,12 @@ class VideoController extends Controller
             $video = Video::with(['user', 'category'])
                 ->withCount(['reactions as likes_count' => function ($query) {
                     $query->where('value', 1);
-                }, 'views'])
+                }, 'views' => function($query) {
+                    $query->where(function($subQuery) {
+                        $subQuery->withTrashed();
+                    });
+                }
+                ])
                 ->find($id);
             if(!$video){
                 return response()->json([

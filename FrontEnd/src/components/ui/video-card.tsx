@@ -12,7 +12,7 @@ interface VideoCardProps {
 }
 
 export const VideoCard: FC<VideoCardProps> = ({ video, size = 'default' }) => {
-  console.log(video);
+
   const formatViews = (views: number): string => {
     if (views >= 1000000) {
       return `${(views / 1000000).toFixed(1)}M`;

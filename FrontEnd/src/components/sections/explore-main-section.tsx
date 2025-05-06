@@ -19,6 +19,7 @@ export const ExploreMainSection: FC = () => {
     const [page, setPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [perPage, setPerPage] = useState<number>(8);
+    
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -90,7 +91,7 @@ export const ExploreMainSection: FC = () => {
     }
     return (
         <section className="my-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-6 overflow-hidden">
+            <div className="flex items-center justify-between mb-6 ">
                 <CategoryFilter categories={categories} activeCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
                 <SortingFilter onChange={setSortValue} selected={sortValue} setSelected={setSortValue}/>
                 

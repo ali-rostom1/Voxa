@@ -8,6 +8,8 @@ import { Suspense, useEffect, useState } from "react";
 import { WatchOther } from "@/components/sections/watch-other";
 import { VideoDetails } from "@/components/ui/video-details";
 import { ProtectedRoute } from "@/components/protected-route";
+import { useAuthStore } from "@/stores/AuthStore";
+import {CommentsSection} from "@/components/sections/comment-section";
 // import CommentSection from "@/components/ui/comment-section";
 
 export default function Watch() {
@@ -19,6 +21,7 @@ export default function Watch() {
   const [isSaved, setIsSaved] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [likes, setLikes] = useState(0);
+  const {isAuthenticated} = useAuthStore();
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -94,7 +97,7 @@ export default function Watch() {
           if (response.status === 200) {
             const data = response.data;
             setIsLiked(data.isLiked);
-            setIsDisliked(data.is_disLiked);
+            setIsDisliked(data.isDisliked);
             setIsSaved(data.isSaved);
             setIsSubscribed(data.isSubscribed);
           } else {
@@ -104,9 +107,8 @@ export default function Watch() {
           console.error("Failed to fetch reactions");
         }
       };
-
       fetchVideos();
-      fetchReaction();
+      if(isAuthenticated) fetchReaction()
     }
   }, [video, id]);
 
@@ -132,6 +134,7 @@ export default function Watch() {
     try {
       setIsDisliked(!isDisliked);
       setIsLiked(false);
+      if(isLiked) setLikes(likes - 1);
       const response = await apiClient.post(`/api/v1/videos/${id}/dislike`);
       if (response.status !== 200) {
         setIsDisliked(!isDisliked);
@@ -193,7 +196,7 @@ export default function Watch() {
                 onSubscribe={handleSubscribe}
                 likes={likes}
               />
-              {/* <CommentSection /> */}
+              <CommentsSection videoId={video.id}/>
             </>
           ) : (
             <div className="text-gray-500">Loading video...</div>

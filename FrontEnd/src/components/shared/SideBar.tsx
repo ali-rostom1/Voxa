@@ -17,7 +17,6 @@ import {
   X,
   ThumbsUpIcon,
   Bookmark,
-  ListMusic,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/AuthStore';
 import Cookies from 'js-cookie';
@@ -55,8 +54,7 @@ export const SideBar: FC = () => {
     { icon: TrendingUp, label: 'Trending', href: '/trending' },
     { icon: History, label: 'History', href: '/history' },
     { icon: Bookmark, label: 'Saved', href: '/saved' },
-    { icon: ThumbsUpIcon, label: 'Liked', href: '/liked' },
-    { icon: ListMusic, label: 'Playlists', href: '/playlist' },
+    { icon: ThumbsUpIcon, label: 'Liked', href: '/liked' }
   ];
 
   const handleLogout = () => {

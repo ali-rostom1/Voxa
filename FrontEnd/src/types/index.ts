@@ -33,7 +33,7 @@ export interface SidebarItemProps {
 export interface UserProfile {
     id: string;
     name: string;
-    email: string;
+    email?: string;
     pfp_path?: string;
 }
 export interface VoxaHeaderProps {
@@ -54,12 +54,29 @@ export interface Video {
   duration: string;
   thumbnail: string;
 }
-export interface Playlist{
+
+export interface Reply {
   id: string;
-  name: string;
-  description: string;
+  body: string;
   user: UserProfile;
-  uploadTime: string;
-  video_count: number;
-  thumbnail: string;
+  created_at: string;
+  likes: number;
+  dislikes: number;
+  reaction: boolean | null;
+}
+export interface Comment {
+  id: string;
+  body: string;
+  user: UserProfile;
+  created_at: string;
+  likes: number;
+  dislikes: number;
+  reaction: boolean | null;
+  replies: Reply[];
+}
+export interface PaginationData {
+  current_page: number;
+  last_page: number;
+  next_page_url: string | null;
+  data: any[];
 }

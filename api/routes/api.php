@@ -46,12 +46,17 @@ Route::prefix('v1')->group(function(){
         Route::get('/videos/{video}/subscribe',[ReactionController::class, 'subscribe']);
         Route::post('/videos/history/me',[VideoController::class, 'getHistory']);
         Route::delete('/videos/history/clear',[VideoController::class, 'clearHistory']);
+        Route::post('/videos/saved',[VideoController::class,'getVideoBySaved']);
+        Route::post('/videos/liked',[VideoController::class,'getVideoByLiked']);
+        Route::post('/videos/user/{userId}',[VideoController::class,'getVideoByUser']);
+        
 
-
-
+        Route::post('/search',[VideoController::class,'getVideosOrUsersBySearch']);
 
         Route::put('/profile',[ProfileController::class,'update']);
         Route::get('/profile/{userId}',[ProfileController::class,'getUser']);
+        Route::get('/users/{userId}/isSubscribed',[ProfileController::class,'isSubscribed']);
+        Route::get('/users/{userId}/subscribe',[ProfileController::class,'subscribe']);
 
 
         Route::post('comments/{commentId}/replies',[CommentController::class,'addReply']);

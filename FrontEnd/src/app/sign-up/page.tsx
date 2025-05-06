@@ -222,26 +222,6 @@ export default function Signup() {
               </button>
             </form>
 
-            <div className="relative my-3">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-2 text-xs text-gray-500">or sign up with</span>
-              </div>
-            </div>
-
-            <div className="flex justify-center gap-3 mb-4">
-              <button className="p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors shadow-sm">
-                <GoogleIcon />
-              </button>
-              <button className="p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors shadow-sm">
-                <FacebookIcon />
-              </button>
-              <button className="p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors shadow-sm">
-                <LinkedInIcon />
-              </button>
-            </div>
 
             <p className="text-center text-xs text-gray-600">
               Already have an account?{" "}

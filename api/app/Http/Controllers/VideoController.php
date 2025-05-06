@@ -6,6 +6,7 @@ use App\Events\VideoUploaded;
 use App\Http\Requests\VideoStoreRequest;
 use App\Http\Requests\VideoUpdateRequest;
 use App\Models\Playlist;
+use App\Models\User;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -175,10 +176,21 @@ class VideoController extends Controller
             ], 500);
         }
     }
-    public function getVideoByUser($userId)
+    public function getVideoByUser(Request $request,string $userId)
     {
         try {
-            $videos = Video::where('user_id', $userId)->with(['user', 'category'])->paginate(10);
+            $perPage = $request->input('perPage') ?? 8;
+
+            $videos = Video::where('user_id', $userId)
+            ->with(['user', 'category'])
+            ->withCount([
+                'views' => function($query) {
+                    $query->where(function($subQuery) {
+                        $subQuery->withTrashed();
+                    });
+                }
+            ])
+            ->paginate($perPage);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Videos retrieved successfully',
@@ -191,36 +203,54 @@ class VideoController extends Controller
             ], 500);
         }
     }
-    public function getVideoBySearch(Request $request)
+    public function getVideosOrUsersBySearch(Request $request)
     {
         try {
             $request->validate([
                 'search' => 'required|string|max:255',
             ]);
+            
             $searchTerm = $request->input('search');
+
             $videos = Video::where('title', 'LIKE', "%{$searchTerm}%")
                 ->orWhere('description', 'LIKE', "%{$searchTerm}%")
-                ->with(['user', 'category'])
-                ->paginate(10);
+                ->paginate(3);
+
+            $users = User::where('name', 'LIKE', "%{$searchTerm}%")
+                ->paginate(3);
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Videos retrieved successfully',
-                'data' => $videos,
+                'message' => 'Search results retrieved successfully',
+                'data' => [
+                    'videos' => $videos->items(),
+                    'users' => $users->items(),
+                ],
             ], 200);
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'An internal server error occurred while trying to retrieve videos by search.',
+                'message' => 'An internal server error occurred while trying to retrieve search results.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
-    public function getVideoBySaved()
+    public function getVideoBySaved(Request $request)
     {
         try {
+            $perPage = $request->input('perPage') ?? 8;
+
             $videos = Video::whereHas('savedByUsers', function ($query) {
                 $query->where('user_id', Auth::id());
-            })->with(['user', 'category'])->paginate(10);
+            })->with(['user', 'category'])
+            ->withCount([
+                'views' => function($query) {
+                    $query->where(function($subQuery) {
+                        $subQuery->withTrashed();
+                    });
+                }
+            ])
+            ->paginate($perPage);
 
             return response()->json([
                 'status' => 'success',
@@ -231,6 +261,36 @@ class VideoController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An internal server error occurred while trying to retrieve saved videos.',
+            ], 500);
+        }
+    }
+    public function getVideoByLiked(Request $request)
+    {
+        try {
+            $perPage = $request->input('perPage') ?? 8;
+
+            $videos = Video::whereHas('reactions', function ($query) {
+                $query->where('user_id', Auth::id())
+                ->where('value',1);
+            })->with(['user', 'category'])
+            ->withCount([
+                'views' => function($query) {
+                    $query->where(function($subQuery) {
+                        $subQuery->withTrashed();
+                    });
+                }
+            ])
+            ->paginate($perPage);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Videos retrieved successfully',
+                'data' => $videos,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An internal server error occurred while trying to retrieve liked videos.',
             ], 500);
         }
     }
